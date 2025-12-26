@@ -3,7 +3,8 @@ import {
   LucideAngularModule,
   User, Bot, X, Settings, Database, Cloud, Plus, Trash2,
   Layers, Search, Cpu, FolderOpen, ChevronDown, Check,
-  FileText, Send, Loader2, MessageSquare, ShieldCheck
+  FileText, Send, Loader2, MessageSquare, ShieldCheck,
+  Copy, AlertCircle, Activity
 } from 'lucide-angular';
 
 export const appConfig: ApplicationConfig = {
@@ -13,7 +14,7 @@ export const appConfig: ApplicationConfig = {
       LucideAngularModule.pick({
         User, Bot, X, Settings, Database, Cloud, Plus, Trash2,
         Layers, Search, Cpu, FolderOpen, ChevronDown, Check,
-        FileText, Send, Loader2, MessageSquare, ShieldCheck
+        FileText, Send, Loader2, MessageSquare, ShieldCheck, Copy, AlertCircle, Activity
       })
     )
   ]

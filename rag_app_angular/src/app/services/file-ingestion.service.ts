@@ -1,9 +1,8 @@
 import { Injectable } from '@angular/core';
 import * as mammoth from 'mammoth';
 import * as pdfjsLib from 'pdfjs-dist';
-
-// Configure pdf.js worker
-pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`;
+// Configure pdf.js worker to use local public asset
+pdfjsLib.GlobalWorkerOptions.workerSrc = '/pdf.worker.min.mjs';
 
 @Injectable({
     providedIn: 'root'
@@ -41,20 +40,23 @@ export class FileIngestionService {
     }
 
     private async extractFromPdf(file: File): Promise<string> {
-        const arrayBuffer = await file.arrayBuffer();
-        const loadingTask = pdfjsLib.getDocument({ data: arrayBuffer });
-        const pdf = await loadingTask.promise;
-        let fullText = '';
-
-        for (let i = 1; i <= pdf.numPages; i++) {
-            const page = await pdf.getPage(i);
-            const textContent = await page.getTextContent();
-            const pageText = textContent.items
-                .map((item: any) => item.str)
-                .join(' ');
-            fullText += pageText + '\n';
+        try {
+            const arrayBuffer = await file.arrayBuffer();
+            const loadingTask = pdfjsLib.getDocument({ data: arrayBuffer });
+            const pdf = await loadingTask.promise;
+            let fullText = '';
+            for (let i = 1; i <= pdf.numPages; i++) {
+                const page = await pdf.getPage(i);
+                const textContent = await page.getTextContent();
+                const pageText = textContent.items
+                    .map((item: any) => item.str)
+                    .join(' ');
+                fullText += pageText + '\n';
+            }
+            return fullText;
+        } catch (e) {
+            console.error('PDF extraction failed', e);
+            throw new Error('Failed to extract text from PDF. Ensure the file is not corrupted and pdfjs worker is reachable.');
         }
-
-        return fullText;
     }
 }
