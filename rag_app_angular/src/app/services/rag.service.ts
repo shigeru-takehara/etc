@@ -178,7 +178,7 @@ export class RagService {
             const config = this.useCloud() ? this.cloudConfig() : this.localConfig();
 
             const answer = await this.apiService.getChatCompletion({
-                prompt: question,
+                prompt: `${question}\n\nPlease respond in Markdown format.`,
                 context,
                 baseUrl: config.baseUrl,
                 model: config.chatModel,
