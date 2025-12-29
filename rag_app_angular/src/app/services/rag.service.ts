@@ -29,19 +29,23 @@ export class RagService {
     isProcessing = signal(false);
     isChunkingEnabled = signal(true);
     topK = signal(5);
-    useCloud = signal(false);
+    useCloud = signal(localStorage.getItem('use_cloud_ng') === 'true');
 
-    localConfig = signal<RagConfig>({
-        baseUrl: 'http://localhost:1234/v1',
-        chatModel: 'llama-3.2-3b-instruct',
-        embeddingModel: 'text-embedding-nomic-embed-text-v1.5@q4_k_m'
-    });
+    localConfig = signal<RagConfig>(
+        localStorage.getItem('local_config_ng') ? JSON.parse(localStorage.getItem('local_config_ng')!) : {
+            baseUrl: 'http://localhost:1234/v1',
+            chatModel: 'llama-3.2-3b-instruct',
+            embeddingModel: 'text-embedding-nomic-embed-text-v1.5@q4_k_m'
+        }
+    );
 
-    cloudConfig = signal<RagConfig>({
-        baseUrl: 'https://api.openai.com/v1',
-        chatModel: 'gpt-4o-mini',
-        apiKey: ''
-    });
+    cloudConfig = signal<RagConfig>(
+        localStorage.getItem('cloud_config_ng') ? JSON.parse(localStorage.getItem('cloud_config_ng')!) : {
+            baseUrl: 'https://api.openai.com/v1',
+            chatModel: 'gpt-4o-mini',
+            apiKey: ''
+        }
+    );
 
     constructor(
         private apiService: ApiService,
@@ -74,14 +78,6 @@ export class RagService {
         await this.vectorStore.init(currentWs.id);
         this.activeWorkspace.set(currentWs);
         this.documents.set([...this.vectorStore.getAllDocuments()]);
-
-        const savedLocal = localStorage.getItem('local_config_ng');
-        if (savedLocal) this.localConfig.set(JSON.parse(savedLocal));
-        const savedCloud = localStorage.getItem('cloud_config_ng');
-        if (savedCloud) this.cloudConfig.set(JSON.parse(savedCloud));
-
-        const savedUseCloud = localStorage.getItem('use_cloud_ng');
-        if (savedUseCloud) this.useCloud.set(savedUseCloud === 'true');
     }
 
     async createWorkspace(name: string) {
