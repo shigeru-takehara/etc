@@ -96,8 +96,9 @@ import { RagService } from './services/rag.service';
               <lucide-icon *ngIf="isProcessing()" [name]="'loader-2'" class="animate-spin" [size]="20"></lucide-icon>
             </button>
           </div>
-          <p class="text-center mt-4 text-[10px] text-slate-500 uppercase tracking-[0.2em] font-medium">
-            Powered by Local Intelligence
+          <p class="text-center mt-2 text-[10px] uppercase tracking-[0.2em] font-medium" 
+             [ngClass]="rewriteStatus() ? 'text-primary-400 animate-pulse' : 'text-slate-500'">
+            {{ rewriteStatus() || 'Powered by Local Intelligence' }}
           </p>
         </div>
       </main>
@@ -116,6 +117,7 @@ export class App implements AfterViewChecked {
 
   isSettingsOpen = signal(false);
   userInput = '';
+  rewriteStatus = signal<string | null>(null);
 
   messages = this.ragService.messages;
   isProcessing = this.ragService.isProcessing;
@@ -134,8 +136,27 @@ export class App implements AfterViewChecked {
     e.preventDefault();
     if (!this.userInput.trim() || this.isProcessing()) return;
 
+    // Smart Search Logic
+    if (this.ragService.isQueryRewritingEnabled() && !this.rewriteStatus()) {
+      this.isProcessing.set(true);
+      this.rewriteStatus.set("Optimizing query...");
+
+      try {
+        const rewritten = await this.ragService.rewriteQuery(this.userInput);
+        this.userInput = rewritten;
+        this.rewriteStatus.set("Query optimized. Press Enter to search.");
+      } catch (err) {
+        this.rewriteStatus.set(null); // Fallback if fails
+      } finally {
+        this.isProcessing.set(false);
+      }
+      return; // Stop here, wait for user confirmation
+    }
+
+    // Normal submission (or confirmation after rewrite)
     const query = this.userInput;
     this.userInput = '';
+    this.rewriteStatus.set(null); // Reset status
     await this.ragService.askQuestion(query);
   }
 }

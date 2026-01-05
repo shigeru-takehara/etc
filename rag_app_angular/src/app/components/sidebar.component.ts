@@ -123,6 +123,19 @@ import { Workspace } from '../services/persistence.service';
             </button>
           </div>
 
+          <div style="display: flex; align-items: center; justify-content: space-between; padding: 0 0.5rem 1rem;">
+            <span style="font-size: 0.875rem; color: #cbd5e1; display: flex; align-items: center; gap: 0.5rem;">
+              <lucide-icon [name]="'sparkles'" style="color: #64748b;" [size]="16"></lucide-icon> Smart Search
+            </span>
+            <button 
+              (click)="ragService.isQueryRewritingEnabled.set(!isQueryRewritingEnabled())"
+              style="width: 2.5rem; height: 1.25rem; border-radius: 9999px; border: none; cursor: pointer; position: relative; transition: background 0.2s;"
+              [ngStyle]="{'background': isQueryRewritingEnabled() ? '#0284c7' : '#334155'}"
+            >
+              <div style="position: absolute; top: 0.25rem; width: 0.75rem; height: 0.75rem; background: white; border-radius: 9999px; transition: left 0.2s;" [ngStyle]="{'left': isQueryRewritingEnabled() ? '1.5rem' : '0.25rem'}"></div>
+            </button>
+          </div>
+
           <div style="padding: 0 0.5rem 1rem;">
             <div style="display: flex; justify-content: space-between; font-size: 0.875rem; color: #cbd5e1; margin-bottom: 0.5rem;">
               <span style="display: flex; align-items: center; gap: 0.5rem;">
@@ -172,6 +185,7 @@ export class SidebarComponent {
   workspaces = this.ragService.workspaces;
   activeWorkspace = this.ragService.activeWorkspace;
   isChunkingEnabled = this.ragService.isChunkingEnabled;
+  isQueryRewritingEnabled = this.ragService.isQueryRewritingEnabled;
   topK = this.ragService.topK;
   useCloud = this.ragService.useCloud;
 

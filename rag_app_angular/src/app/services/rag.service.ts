@@ -29,6 +29,7 @@ export class RagService {
     activeWorkspace = signal<Workspace | null>(null);
     isProcessing = signal(false);
     isChunkingEnabled = signal(true);
+    isQueryRewritingEnabled = signal(false);
     topK = signal(localStorage.getItem('top_k_ng') ? parseInt(localStorage.getItem('top_k_ng')!, 10) : 5);
 
     useCloud = signal(localStorage.getItem('use_cloud_ng') === 'true');
@@ -39,7 +40,7 @@ export class RagService {
             baseUrl: 'http://localhost:1234/v1',
             chatModel: 'llama-3.2-3b-instruct',
             embeddingModel: 'text-embedding-nomic-embed-text-v1.5@q4_k_m',
-            temperature: 0.7
+            temperature: 1
         }
     );
 
@@ -220,13 +221,38 @@ export class RagService {
                 context,
                 baseUrl: config.baseUrl,
                 model: config.chatModel,
-                apiKey: this.useCloud() ? this.cloudConfig().apiKey : undefined
+                apiKey: this.useCloud() ? this.cloudConfig().apiKey : undefined,
+                temperature: config.temperature
             });
             this.messages.update(prev => [...prev, { role: 'assistant', content: answer }]);
         } catch (e) {
             this.messages.update(prev => [...prev, { role: 'assistant', content: `Error: ${e instanceof Error ? e.message : 'Unknown error'}` }]);
         } finally {
             this.isProcessing.set(false);
+        }
+    }
+
+    async rewriteQuery(originalQuery: string): Promise<string> {
+        const config = this.useCloud() ? this.cloudConfig() : this.localConfig();
+        const prompt = `Refine the following user query to be more suitable for a semantic vector search. 
+        It should be concise and keyword-focused if necessary, but maintain the original intent. 
+        Return ONLY the refined query text, no other commentary.
+        
+        Original Query: "${originalQuery}"`;
+
+        try {
+            const rewritten = await this.apiService.getChatCompletion({
+                prompt,
+                context: [], // No context needed for rewriting itself
+                baseUrl: config.baseUrl,
+                model: config.chatModel,
+                apiKey: this.useCloud() ? this.cloudConfig().apiKey : undefined,
+                temperature: config.temperature
+            });
+            return rewritten.trim().replace(/^"|"$/g, ''); // Remove quotes if any
+        } catch (e) {
+            console.warn('Query rewriting failed, using original:', e);
+            return originalQuery;
         }
     }
 
