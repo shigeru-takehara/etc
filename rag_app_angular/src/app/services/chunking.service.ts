@@ -4,7 +4,7 @@ import { Injectable } from '@angular/core';
     providedIn: 'root'
 })
 export class ChunkingService {
-    splitText(text: string, chunkSize: number = 1000, overlap: number = 100): string[] {
+    splitText(text: string, chunkSize: number = 256, overlap: number = 75): string[] {
         const chunks: string[] = [];
         if (!text) return chunks;
 

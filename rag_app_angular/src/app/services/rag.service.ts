@@ -15,6 +15,7 @@ export interface RagConfig {
     chatModel: string;
     embeddingModel?: string;
     apiKey?: string;
+    temperature?: number;
 }
 
 @Injectable({
@@ -28,14 +29,17 @@ export class RagService {
     activeWorkspace = signal<Workspace | null>(null);
     isProcessing = signal(false);
     isChunkingEnabled = signal(true);
-    topK = signal(5);
+    topK = signal(localStorage.getItem('top_k_ng') ? parseInt(localStorage.getItem('top_k_ng')!, 10) : 5);
+
     useCloud = signal(localStorage.getItem('use_cloud_ng') === 'true');
+    corefUrl = signal('http://localhost:8000/resolve'); // Default URL
 
     localConfig = signal<RagConfig>(
         localStorage.getItem('local_config_ng') ? JSON.parse(localStorage.getItem('local_config_ng')!) : {
             baseUrl: 'http://localhost:1234/v1',
             chatModel: 'llama-3.2-3b-instruct',
-            embeddingModel: 'text-embedding-nomic-embed-text-v1.5@q4_k_m'
+            embeddingModel: 'text-embedding-nomic-embed-text-v1.5@q4_k_m',
+            temperature: 0.7
         }
     );
 
@@ -43,7 +47,8 @@ export class RagService {
         localStorage.getItem('cloud_config_ng') ? JSON.parse(localStorage.getItem('cloud_config_ng')!) : {
             baseUrl: 'https://api.openai.com/v1',
             chatModel: 'gpt-4o-mini',
-            apiKey: ''
+            apiKey: '',
+            temperature: 1
         }
     );
 
@@ -64,7 +69,7 @@ export class RagService {
             localStorage.setItem('cloud_config_ng', JSON.stringify(this.cloudConfig()));
         });
         effect(() => {
-            localStorage.setItem('use_cloud_ng', String(this.useCloud()));
+            localStorage.setItem('top_k_ng', String(this.topK()));
         });
     }
 
@@ -78,6 +83,20 @@ export class RagService {
         await this.vectorStore.init(currentWs.id);
         this.activeWorkspace.set(currentWs);
         this.documents.set([...this.vectorStore.getAllDocuments()]);
+
+        // Load backend config
+        try {
+            const response = await fetch('assets/backend-config.json');
+            if (response.ok) {
+                const config = await response.json();
+                if (config.corefUrl) {
+                    this.corefUrl.set(config.corefUrl);
+                    console.log('Loaded backend config:', config);
+                }
+            }
+        } catch (e) {
+            console.warn('Could not load backend config, using default:', this.corefUrl());
+        }
     }
 
     async createWorkspace(name: string) {
@@ -134,7 +153,30 @@ export class RagService {
     async addDocumentFromFile(file: File) {
         this.isProcessing.set(true);
         try {
-            const content = await this.fileService.extractText(file);
+            let content = await this.fileService.extractText(file);
+
+            // Co-reference Resolution
+            try {
+                console.log('Resolving co-references...');
+                const response = await fetch(this.corefUrl(), {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ text: content })
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.resolved_text) {
+                        content = data.resolved_text;
+                        console.log('Co-reference resolution complete.');
+                    }
+                } else {
+                    console.warn('Co-reference API failed:', response.status);
+                }
+            } catch (e) {
+                console.warn('Co-reference resolution error:', e);
+            }
+
             const sourceId = file.name;
             if (this.isChunkingEnabled()) {
                 const chunks = this.chunkingService.splitText(content);

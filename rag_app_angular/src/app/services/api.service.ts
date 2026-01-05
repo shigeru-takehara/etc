@@ -29,8 +29,9 @@ export class ApiService {
         baseUrl: string;
         model: string;
         apiKey?: string;
+        temperature?: number;
     }): Promise<string> {
-        const { prompt, context, baseUrl, model, apiKey } = options;
+        const { prompt, context, baseUrl, model, apiKey, temperature = 0.7 } = options;
 
         const messages = [
             {
@@ -46,7 +47,7 @@ export class ApiService {
                 'Content-Type': 'application/json',
                 ...(apiKey ? { 'Authorization': `Bearer ${apiKey}` } : {})
             },
-            body: JSON.stringify({ model, messages, temperature: 0.7 })
+            body: JSON.stringify({ model, messages, temperature })
         });
 
         if (!response.ok) {

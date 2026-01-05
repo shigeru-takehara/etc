@@ -131,7 +131,7 @@ import { Workspace } from '../services/persistence.service';
               <span style="color: #38bdf8; font-family: monospace; font-size: 0.75rem;">{{ topK() }}</span>
             </div>
             <input 
-              type="range" min="1" max="20" [value]="topK()" 
+              type="range" min="1" max="50" [value]="topK()" 
               (input)="handleTopKChange($event)"
               style="width: 100%; height: 0.25rem; background: #334155; border-radius: 0.5rem; cursor: pointer; accent-color: #0ea5e9;"
             />

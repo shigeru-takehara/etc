@@ -2,13 +2,6 @@
 
 This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 21.0.4.
 
-Additionally, we need to have:
-- LM Studio or Ollma
-
-We use two models as default:
-- llama-3.2-3b-instruct
-- text-embedding-nomic-embed-text-v1.5@q4_k_m
-
 ## Development server
 
 To start a local development server, run:

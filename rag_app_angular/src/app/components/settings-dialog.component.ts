@@ -39,6 +39,7 @@ import { ApiService } from '../services/api.service';
           >
             <lucide-icon [name]="'cloud'" [size]="18"></lucide-icon> Cloud
           </button>
+
         </div>
 
         <!-- Content -->
@@ -60,6 +61,16 @@ import { ApiService } from '../services/api.service';
             <div style="margin-bottom: 1rem;">
               <label class="block text-sm font-medium text-slate-400 mb-1" style="display: block; font-size: 0.875rem; color: #94a3b8; margin-bottom: 0.25rem;">Embedding Model</label>
               <input type="text" [(ngModel)]="tempLocal.embeddingModel" style="width: 100%; background: #020617; border: 1px solid #1e293b; border-radius: 0.5rem; padding: 0.625rem; color: white; outline: none;" />
+            </div>
+            <div style="margin-bottom: 1rem;">
+               <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                  <label class="block text-sm font-medium text-slate-400" style="display: block; font-size: 0.875rem; color: #94a3b8;">Temperature (Creativity)</label>
+                  <span style="color: #38bdf8; font-weight: bold;">{{ tempLocal.temperature }}</span>
+               </div>
+               <input type="range" min="0" max="2" step="0.1" [(ngModel)]="tempLocal.temperature" style="width: 100%; cursor: pointer;" />
+               <p style="font-size: 0.75rem; color: #64748b; margin-top: 0.5rem;">
+                 0.0 = Focused/Deterministic, 1.0 = Balanced, 2.0 = Random/Creative.
+               </p>
             </div>
             <button 
               (click)="testConnection('local')" 
@@ -85,6 +96,16 @@ import { ApiService } from '../services/api.service';
               <label class="block text-sm font-medium text-slate-400 mb-1" style="display: block; font-size: 0.875rem; color: #94a3b8; margin-bottom: 0.25rem;">API Key</label>
               <input type="password" [(ngModel)]="tempCloud.apiKey" style="width: 100%; background: #020617; border: 1px solid #1e293b; border-radius: 0.5rem; padding: 0.625rem; color: white; outline: none;" />
             </div>
+            <div style="margin-bottom: 1rem;">
+              <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                 <label class="block text-sm font-medium text-slate-400" style="display: block; font-size: 0.875rem; color: #94a3b8;">Temperature (Creativity)</label>
+                 <span style="color: #38bdf8; font-weight: bold;">{{ tempCloud.temperature }}</span>
+              </div>
+              <input type="range" min="0" max="2" step="0.1" [(ngModel)]="tempCloud.temperature" style="width: 100%; cursor: pointer;" />
+              <p style="font-size: 0.75rem; color: #64748b; margin-top: 0.5rem;">
+                0.0 = Focused/Deterministic, 1.0 = Balanced, 2.0 = Random/Creative.
+              </p>
+            </div>
             <button 
               (click)="testConnection('cloud')" 
               class="w-full py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg text-sm font-medium transition-colors flex items-center justify-center gap-2"
@@ -95,6 +116,8 @@ import { ApiService } from '../services/api.service';
               {{ testingCloud() ? 'Testing...' : (cloudStatus() === 'success' ? 'Connection Verified' : (cloudStatus() === 'error' ? 'Connection Failed' : 'Test Cloud Connection')) }}
             </button>
           </div>
+
+
         </div>
 
         <!-- Footer -->
