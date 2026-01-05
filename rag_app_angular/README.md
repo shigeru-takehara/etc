@@ -1,3 +1,17 @@
+# Please have 
+- node.js installed
+- npm installed
+- ng installed
+- python installed
+- python -m venv venv
+- venv\Scripts\activate
+- pip install -r requirements.txt
+- ng serve
+
+Also we need to have Cloud LLM API key or local LM Studio or Ollma running at local.
+
+In local LLM, llama3.2 and nomic-text-embedding are used. It's all configurable on the screen.
+
 # RagAppAngular
 
 This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 21.0.4.
