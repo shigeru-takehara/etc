@@ -227,9 +227,33 @@ export class RagService {
     async askQuestion(question: string) {
         this.messages.update(prev => [...prev, { role: 'user', content: question }]);
         this.isProcessing.set(true);
+        this.processingStatus.set('Preparing query...');
+
         try {
+            let processedQuestion = question;
+
+            // 1. Co-reference Resolution for the query (helps follow-up questions)
+            try {
+                this.processingStatus.set('Resolving co-references in query...');
+                const corefResponse = await fetch(this.corefUrl(), {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ text: question })
+                });
+                if (corefResponse.ok) {
+                    const data = await corefResponse.json();
+                    if (data.resolved_text && data.resolved_text !== question) {
+                        processedQuestion = data.resolved_text;
+                        console.log('Query co-reference resolution complete:', processedQuestion);
+                    }
+                }
+            } catch (e) {
+                console.warn('Query co-reference failed, using original:', e);
+            }
+
+            this.processingStatus.set('Searching knowledge base...');
             const embedding = await this.apiService.getEmbedding(
-                question,
+                processedQuestion,
                 this.localConfig().baseUrl,
                 this.localConfig().embeddingModel || ''
             );
@@ -244,11 +268,11 @@ export class RagService {
             }
 
             const context = similarDocs.map(d => d.content);
-
             const config = this.useCloud() ? this.cloudConfig() : this.localConfig();
 
+            this.processingStatus.set('Synthesizing answer...');
             const answer = await this.apiService.getChatCompletion({
-                prompt: `${question}\n\nPlease respond in Markdown format.`,
+                prompt: `${processedQuestion}\n\nPlease respond in Markdown format.`,
                 context,
                 baseUrl: config.baseUrl,
                 model: config.chatModel,
@@ -260,6 +284,7 @@ export class RagService {
             this.messages.update(prev => [...prev, { role: 'assistant', content: `Error: ${e instanceof Error ? e.message : 'Unknown error'}` }]);
         } finally {
             this.isProcessing.set(false);
+            this.processingStatus.set(null);
         }
     }
 
