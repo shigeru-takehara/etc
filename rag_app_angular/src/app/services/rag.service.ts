@@ -28,16 +28,18 @@ export class RagService {
     workspaces = signal<Workspace[]>([]);
     activeWorkspace = signal<Workspace | null>(null);
     isProcessing = signal(false);
+    processingStatus = signal<string | null>(null);
     isChunkingEnabled = signal(true);
     isQueryRewritingEnabled = signal(false);
     topK = signal(localStorage.getItem('top_k_ng') ? parseInt(localStorage.getItem('top_k_ng')!, 10) : 5);
+    similarityThreshold = signal(localStorage.getItem('similarity_threshold_ng') ? parseFloat(localStorage.getItem('similarity_threshold_ng')!) : 0.75);
 
     useCloud = signal(localStorage.getItem('use_cloud_ng') === 'true');
     corefUrl = signal('http://localhost:8000/resolve'); // Default URL
 
     localConfig = signal<RagConfig>(
         localStorage.getItem('local_config_ng') ? JSON.parse(localStorage.getItem('local_config_ng')!) : {
-            baseUrl: 'http://localhost:1234/v1',
+            baseUrl: 'http://127.0.0.1:1234/v1',
             chatModel: 'llama-3.2-3b-instruct',
             embeddingModel: 'text-embedding-nomic-embed-text-v1.5@q4_k_m',
             temperature: 1
@@ -72,6 +74,9 @@ export class RagService {
         effect(() => {
             localStorage.setItem('top_k_ng', String(this.topK()));
         });
+        effect(() => {
+            localStorage.setItem('similarity_threshold_ng', String(this.similarityThreshold()));
+        });
     }
 
     private async init() {
@@ -84,6 +89,17 @@ export class RagService {
         await this.vectorStore.init(currentWs.id);
         this.activeWorkspace.set(currentWs);
         this.documents.set([...this.vectorStore.getAllDocuments()]);
+
+        // Auto-fix baseUrl if it's missing /v1 for localhost/local addresses
+        const currentLocal = this.localConfig();
+        if (currentLocal.baseUrl &&
+            (currentLocal.baseUrl.includes('localhost') || currentLocal.baseUrl.includes('127.0.0.1')) &&
+            !currentLocal.baseUrl.endsWith('/v1') &&
+            !currentLocal.baseUrl.endsWith('/v1/')) {
+            console.log('Patching local baseUrl to include /v1');
+            const newBase = currentLocal.baseUrl.replace(/\/+$/, '') + '/v1';
+            this.localConfig.set({ ...currentLocal, baseUrl: newBase });
+        }
 
         // Load backend config
         try {
@@ -153,11 +169,13 @@ export class RagService {
 
     async addDocumentFromFile(file: File) {
         this.isProcessing.set(true);
+        this.processingStatus.set(`Extracting content from ${file.name}...`);
         try {
             let content = await this.fileService.extractText(file);
 
             // Co-reference Resolution
             try {
+                this.processingStatus.set(`Resolving co-references for ${file.name}...`);
                 console.log('Resolving co-references...');
                 const response = await fetch(this.corefUrl(), {
                     method: 'POST',
@@ -181,15 +199,19 @@ export class RagService {
             const sourceId = file.name;
             if (this.isChunkingEnabled()) {
                 const chunks = this.chunkingService.splitText(content);
+                this.processingStatus.set(`Generated ${chunks.length} chunks. Starting ingestion...`);
                 for (let i = 0; i < chunks.length; i++) {
+                    this.processingStatus.set(`Ingesting chunk ${i + 1} of ${chunks.length}...`);
                     const chunkTitle = chunks.length > 1 ? `${file.name} (Part ${i + 1})` : file.name;
                     await this.addDocument(chunkTitle, chunks[i], sourceId);
                 }
             } else {
+                this.processingStatus.set(`Ingesting file ${file.name}...`);
                 await this.addDocument(file.name, content, sourceId);
             }
         } finally {
             this.isProcessing.set(false);
+            this.processingStatus.set(null);
         }
     }
 
@@ -211,7 +233,16 @@ export class RagService {
                 this.localConfig().baseUrl,
                 this.localConfig().embeddingModel || ''
             );
-            const similarDocs = await this.vectorStore.searchSimilar(embedding, this.topK());
+            const similarDocs = await this.vectorStore.searchSimilar(embedding, this.topK(), this.similarityThreshold());
+
+            if (similarDocs.length === 0) {
+                this.messages.update(prev => [...prev, {
+                    role: 'assistant',
+                    content: "I couldn't find any relevant information in your documents with a high enough confidence (75%+). Could you please try rephrasing your question or adding more context?"
+                }]);
+                return;
+            }
+
             const context = similarDocs.map(d => d.content);
 
             const config = this.useCloud() ? this.cloudConfig() : this.localConfig();

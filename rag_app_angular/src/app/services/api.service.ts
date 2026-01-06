@@ -4,8 +4,15 @@ import { Injectable } from '@angular/core';
     providedIn: 'root'
 })
 export class ApiService {
+    private joinUrl(baseUrl: string, endpoint: string): string {
+        const base = baseUrl.replace(/\/+$/, '');
+        const path = endpoint.replace(/^\/+/, '');
+        return `${base}/${path}`;
+    }
+
     async getEmbedding(text: string, baseUrl: string, model: string): Promise<number[]> {
-        const response = await fetch(`${baseUrl}/embeddings`, {
+        const url = this.joinUrl(baseUrl, 'embeddings');
+        const response = await fetch(url, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ input: text, model })
@@ -41,7 +48,8 @@ export class ApiService {
             { role: 'user', content: prompt }
         ];
 
-        const response = await fetch(`${baseUrl}/chat/completions`, {
+        const url = this.joinUrl(baseUrl, 'chat/completions');
+        const response = await fetch(url, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -65,7 +73,8 @@ export class ApiService {
 
     async testConnection(baseUrl: string, apiKey?: string): Promise<boolean> {
         try {
-            const response = await fetch(`${baseUrl}/models`, {
+            const url = this.joinUrl(baseUrl, 'models');
+            const response = await fetch(url, {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',

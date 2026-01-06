@@ -52,7 +52,7 @@ export class VectorStoreService {
         return this.documents;
     }
 
-    async searchSimilar(queryEmbedding: number[], limit: number = 5): Promise<DocumentEntry[]> {
+    async searchSimilar(queryEmbedding: number[], limit: number = 5, threshold: number = 0): Promise<DocumentEntry[]> {
         if (!this.isInitialized) await this.init();
         if (this.documents.length === 0) return [];
 
@@ -62,10 +62,13 @@ export class VectorStoreService {
             similarity: this.cosineSimilarity(queryEmbedding, doc.embedding)
         }));
 
-        // Sort by similarity descending
-        results.sort((a, b) => b.similarity - a.similarity);
+        // Filter by threshold
+        const filteredResults = results.filter(r => r.similarity >= threshold);
 
-        return results.slice(0, limit).map(r => r.doc);
+        // Sort by similarity descending
+        filteredResults.sort((a, b) => b.similarity - a.similarity);
+
+        return filteredResults.slice(0, limit).map(r => r.doc);
     }
 
     private cosineSimilarity(vecA: number[], vecB: number[]): number {

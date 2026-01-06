@@ -34,7 +34,7 @@ import { RagService } from './services/rag.service';
           <div class="bg-primary-500/10 backdrop-blur-md px-6 py-2 flex items-center justify-between border-b border-primary-500/20">
             <div class="flex items-center gap-3">
               <lucide-icon [name]="'loader-2'" class="animate-spin text-primary-400" [size]="14"></lucide-icon>
-              <span class="text-xs font-semibold text-primary-300 uppercase tracking-widest">Processing Intelligence...</span>
+              <span class="text-xs font-semibold text-primary-300 uppercase tracking-widest">{{ processingStatus() || 'Processing Intelligence...' }}</span>
             </div>
           </div>
         </div>
@@ -121,6 +121,7 @@ export class App implements AfterViewChecked {
 
   messages = this.ragService.messages;
   isProcessing = this.ragService.isProcessing;
+  processingStatus = this.ragService.processingStatus;
 
   ngAfterViewChecked() {
     this.scrollToBottom();

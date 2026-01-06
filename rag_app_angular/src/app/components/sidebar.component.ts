@@ -144,8 +144,22 @@ import { Workspace } from '../services/persistence.service';
               <span style="color: #38bdf8; font-family: monospace; font-size: 0.75rem;">{{ topK() }}</span>
             </div>
             <input 
-              type="range" min="1" max="50" [value]="topK()" 
+              type="range" min="1" max="20" [value]="topK()" 
               (input)="handleTopKChange($event)"
+              style="width: 100%; height: 0.25rem; background: #334155; border-radius: 0.5rem; cursor: pointer; accent-color: #0ea5e9;"
+            />
+          </div>
+
+          <div style="padding: 0 0.5rem 1rem;">
+            <div style="display: flex; justify-content: space-between; font-size: 0.875rem; color: #cbd5e1; margin-bottom: 0.5rem;">
+              <span style="display: flex; align-items: center; gap: 0.5rem;">
+                <lucide-icon [name]="'target'" style="color: #64748b;" [size]="16"></lucide-icon> Threshold
+              </span>
+              <span style="color: #38bdf8; font-family: monospace; font-size: 0.75rem;">{{ (similarityThreshold() * 100).toFixed(0) }}%</span>
+            </div>
+            <input 
+              type="range" min="0" max="100" [value]="similarityThreshold() * 100" 
+              (input)="handleThresholdChange($event)"
               style="width: 100%; height: 0.25rem; background: #334155; border-radius: 0.5rem; cursor: pointer; accent-color: #0ea5e9;"
             />
           </div>
@@ -187,6 +201,7 @@ export class SidebarComponent {
   isChunkingEnabled = this.ragService.isChunkingEnabled;
   isQueryRewritingEnabled = this.ragService.isQueryRewritingEnabled;
   topK = this.ragService.topK;
+  similarityThreshold = this.ragService.similarityThreshold;
   useCloud = this.ragService.useCloud;
 
   // Computed grouping
@@ -232,5 +247,10 @@ export class SidebarComponent {
   handleTopKChange(e: Event) {
     const val = (e.target as HTMLInputElement).value;
     this.ragService.topK.set(parseInt(val));
+  }
+
+  handleThresholdChange(e: Event) {
+    const val = (e.target as HTMLInputElement).value;
+    this.ragService.similarityThreshold.set(parseInt(val) / 100);
   }
 }

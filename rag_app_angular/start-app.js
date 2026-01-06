@@ -1,7 +1,11 @@
-const portfinder = require('portfinder');
-const { spawn } = require('child_process');
-const fs = require('fs');
-const path = require('path');
+import portfinder from 'portfinder';
+import { spawn } from 'child_process';
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // Configuration
 const START_PORT = 8000;
@@ -29,9 +33,6 @@ async function startApp() {
 
         // 3. Start Python Backend
         console.log('[Launcher] Starting Python backend...');
-        // Assuming a virtual environment is not strictly enforced by the launcher, 
-        // but the user would typically run this in an environment where 'python' is available.
-        // Ideally, we should check for 'venv' or 'conda', but simpler is 'python'.
         const pythonProcess = spawn('python', ['python_backend/main.py', '--port', port.toString()], {
             stdio: 'inherit',
             shell: true
