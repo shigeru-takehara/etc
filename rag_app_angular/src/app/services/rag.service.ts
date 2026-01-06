@@ -238,7 +238,7 @@ export class RagService {
             if (similarDocs.length === 0) {
                 this.messages.update(prev => [...prev, {
                     role: 'assistant',
-                    content: "I couldn't find any relevant information in your documents with a high enough confidence (75%+). Could you please try rephrasing your question or adding more context?"
+                    content: `I couldn't find any relevant information in your documents with a high enough confidence (${(this.similarityThreshold() * 100).toFixed(0)}%+). Could you please try rephrasing your question or adding more context?`
                 }]);
                 return;
             }
