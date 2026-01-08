@@ -8,7 +8,9 @@ from fastcoref import FCoref
 # Initialize the model (this will download the model on first run)
 # Using 'fqasrey/fcoref-distilbert-base-uncased' as it is smaller and faster
 try:
+    print("Loading coref model (this may take a minute)...")
     model = FCoref(device='cpu') # Use CPU for compatibility, or 'cuda' if available
+    print("Model loaded successfully.")
 except Exception as e:
     print(f"Error loading model: {e}")
     model = None

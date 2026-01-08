@@ -35,7 +35,8 @@ export class RagService {
     similarityThreshold = signal(localStorage.getItem('similarity_threshold_ng') ? parseFloat(localStorage.getItem('similarity_threshold_ng')!) : 0.75);
 
     useCloud = signal(localStorage.getItem('use_cloud_ng') === 'true');
-    corefUrl = signal('http://localhost:8000/resolve'); // Default URL
+    corefUrl = signal('http://localhost:8000/resolve');
+    corefStatus = signal<'off' | 'starting' | 'ready' | 'error'>('off');
 
     localConfig = signal<RagConfig>(
         localStorage.getItem('local_config_ng') ? JSON.parse(localStorage.getItem('local_config_ng')!) : {
@@ -114,6 +115,40 @@ export class RagService {
         } catch (e) {
             console.warn('Could not load backend config, using default:', this.corefUrl());
         }
+
+        // Periodically poll for coref status
+        this.pollCorefStatus();
+        setInterval(() => this.pollCorefStatus(), 30000); // Every 30s
+    }
+
+    async pollCorefStatus() {
+        try {
+            const statusUrl = this.corefUrl().replace('/resolve', '/status');
+            const res = await fetch(statusUrl);
+            if (res.ok) {
+                const data = await res.json();
+                this.corefStatus.set(data.status);
+            }
+        } catch (e) {
+            this.corefStatus.set('off');
+        }
+    }
+
+    async startCorefServer() {
+        if (this.corefStatus() === 'ready' || this.corefStatus() === 'starting') return;
+
+        this.corefStatus.set('starting');
+        // Trigger a dummy resolve to force start
+        try {
+            await fetch(this.corefUrl(), {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ text: 'ping' })
+            });
+            this.pollCorefStatus();
+        } catch (e) {
+            this.corefStatus.set('error');
+        }
     }
 
     async createWorkspace(name: string) {
@@ -188,12 +223,15 @@ export class RagService {
                     if (data.resolved_text) {
                         content = data.resolved_text;
                         console.log('Co-reference resolution complete.');
+                        this.corefStatus.set('ready');
                     }
                 } else {
                     console.warn('Co-reference API failed:', response.status);
+                    this.corefStatus.set('error');
                 }
             } catch (e) {
                 console.warn('Co-reference resolution error:', e);
+                this.corefStatus.set('error');
             }
 
             const sourceId = file.name;

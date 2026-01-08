@@ -40,6 +40,13 @@ import { ApiService } from '../services/api.service';
             <lucide-icon [name]="'cloud'" [size]="18"></lucide-icon> Cloud
           </button>
 
+          <button 
+            (click)="activeTab.set('advanced')"
+            style="flex: 1; padding: 1rem; display: flex; align-items: center; justify-content: center; gap: 0.5rem; background: transparent; border: none; cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.2s;"
+            [ngStyle]="{'color': activeTab() === 'advanced' ? '#38bdf8' : '#94a3b8', 'border-bottom-color': activeTab() === 'advanced' ? '#38bdf8' : 'transparent', 'background': activeTab() === 'advanced' ? 'rgba(56, 189, 248, 0.05)' : 'transparent'}"
+          >
+            <lucide-icon [name]="'cpu'" [size]="18"></lucide-icon> Advanced
+          </button>
         </div>
 
         <!-- Content -->
@@ -117,6 +124,47 @@ import { ApiService } from '../services/api.service';
             </button>
           </div>
 
+          <div *ngIf="activeTab() === 'advanced'" class="space-y-4">
+            <div style="padding: 1rem; background: rgba(30, 41, 59, 0.5); border: 1px solid #1e293b; border-radius: 0.75rem;">
+              <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem;">
+                <div>
+                  <h3 style="font-size: 0.875rem; font-weight: 600; color: white; margin: 0;">Co-reference Engine</h3>
+                  <p style="font-size: 0.75rem; color: #64748b; margin: 0;">Resolves nouns like "it" or "he" for better RAG accuracy.</p>
+                </div>
+                <div [ngClass]="{
+                  'bg-slate-800 text-slate-400': ragService.corefStatus() === 'off',
+                  'bg-blue-900/30 text-blue-400': ragService.corefStatus() === 'starting',
+                  'bg-green-900/30 text-green-400': ragService.corefStatus() === 'ready',
+                  'bg-red-900/30 text-red-400': ragService.corefStatus() === 'error'
+                }" style="padding: 0.25rem 0.625rem; border-radius: 9999px; font-size: 0.75rem; font-weight: 600; text-transform: uppercase;">
+                  {{ ragService.corefStatus() }}
+                </div>
+              </div>
+
+              <div *ngIf="ragService.corefStatus() === 'starting'" style="margin-bottom: 1rem;">
+                <div style="height: 4px; background: #0f172a; border-radius: 2px; overflow: hidden;">
+                   <div class="animate-pulse" style="height: 100%; width: 60%; background: #38bdf8;"></div>
+                </div>
+                <p style="font-size: 0.7rem; color: #38bdf8; margin-top: 0.5rem;">Loading model into memory (approx 1 min)...</p>
+              </div>
+
+              <button 
+                (click)="ragService.startCorefServer()" 
+                [disabled]="ragService.corefStatus() === 'ready' || ragService.corefStatus() === 'starting'"
+                class="w-full py-2 rounded-lg text-sm font-medium transition-all flex items-center justify-center gap-2"
+                [ngStyle]="{
+                  'background': ragService.corefStatus() === 'ready' ? '#064e3b' : '#1e293b',
+                  'color': ragService.corefStatus() === 'ready' ? '#34d399' : '#cbd5e1',
+                  'cursor': (ragService.corefStatus() === 'ready' || ragService.corefStatus() === 'starting') ? 'not-allowed' : 'pointer'
+                }"
+              >
+                <lucide-icon [name]="ragService.corefStatus() === 'ready' ? 'check-circle' : 'play'" [size]="16"></lucide-icon>
+                {{ ragService.corefStatus() === 'ready' ? 'Engine Ready' : (ragService.corefStatus() === 'starting' ? 'Starting...' : 'Enable Engine') }}
+              </button>
+            </div>
+          </div>
+
+
 
         </div>
 
@@ -130,12 +178,12 @@ import { ApiService } from '../services/api.service';
   `
 })
 export class SettingsDialogComponent {
-  private ragService = inject(RagService);
+  public ragService = inject(RagService);
 
   isOpen = input.required<boolean>();
   close = output();
 
-  activeTab = signal<'local' | 'cloud'>('local');
+  activeTab = signal<'local' | 'cloud' | 'advanced'>('local');
 
   tempLocal = { ...this.ragService.localConfig() };
   tempCloud = { ...this.ragService.cloudConfig() };
