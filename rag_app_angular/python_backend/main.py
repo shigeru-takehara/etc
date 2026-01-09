@@ -1,15 +1,29 @@
+import os
 import argparse
 import uvicorn
+from pathlib import Path
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
+
+# Configure local model storage
+# This ensures models are saved inside the project directory instead of ~/.cache
+base_dir = Path(__file__).parent.absolute()
+models_dir = os.path.join(base_dir, "models")
+os.makedirs(models_dir, exist_ok=True)
+
+# Set environment variables for Transformers and HuggingFace
+# MUST be set before importing fastcoref/transformers
+os.environ["TRANSFORMERS_CACHE"] = models_dir
+os.environ["HF_HOME"] = models_dir
+os.environ["TORCH_HOME"] = models_dir
+
 from fastcoref import FCoref
 
-# Initialize the model (this will download the model on first run)
-# Using 'fqasrey/fcoref-distilbert-base-uncased' as it is smaller and faster
+# Initialize the model (this will download the model to the local models_dir on first run)
 try:
-    print("Loading coref model (this may take a minute)...")
-    model = FCoref(device='cpu') # Use CPU for compatibility, or 'cuda' if available
+    print(f"Loading coref model into {models_dir} (this may take a minute)...")
+    model = FCoref(device='cpu') 
     print("Model loaded successfully.")
 except Exception as e:
     print(f"Error loading model: {e}")

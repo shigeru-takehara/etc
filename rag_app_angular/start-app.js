@@ -22,17 +22,63 @@ if (!fs.existsSync(ASSETS_DIR)) {
 let activePythonProcess = null;
 let pythonPort = null;
 let idleTimer = null;
-const IDLE_TIMEOUT_MS = 10 * 60 * 1000; // 10 minutes
+const IDLE_TIMEOUT_MS = 0; // Disabled
 
+// No idle timeout - server stays running per user request
 function resetIdleTimer() {
-    if (idleTimer) clearTimeout(idleTimer);
-    idleTimer = setTimeout(() => {
-        if (activePythonProcess) {
-            console.log('[Manager] Idle timeout reached. Shutting down Python server...');
-            activePythonProcess.kill();
-            activePythonProcess = null;
+    // Logic removed to prevent server shutdown
+}
+
+async function ensurePythonServerRunning() {
+    if (activePythonProcess) return;
+
+    console.log('[Manager] Starting co-reference engine eager boot...');
+    try {
+        portfinder.basePort = PYTHON_BASE_PORT;
+        pythonPort = await portfinder.getPortPromise();
+
+        activePythonProcess = spawn('python', ['python_backend/main.py', '--port', pythonPort.toString()], {
+            stdio: 'pipe',
+            shell: true
+        });
+
+        activePythonProcess.stdout.on('data', (data) => {
+            console.log(`[Python STDOUT] ${data}`);
+        });
+        activePythonProcess.stderr.on('data', (data) => {
+            console.error(`[Python STDERR] ${data}`);
+        });
+
+        // Wait for readiness
+        let isReady = false;
+        for (let i = 0; i < 120; i++) { // Increase wait time to 2 mins for slow model loads
+            try {
+                const healthCheck = await new Promise((resolve) => {
+                    const hReq = http.get(`http://localhost:${pythonPort}/health`, (hRes) => {
+                        resolve(hRes.statusCode === 200);
+                    });
+                    hReq.on('error', () => resolve(false));
+                    hReq.setTimeout(500, () => { hReq.destroy(); resolve(false); });
+                });
+                if (healthCheck) {
+                    isReady = true;
+                    break;
+                }
+            } catch (e) { }
+            await new Promise(r => setTimeout(r, 1000));
         }
-    }, IDLE_TIMEOUT_MS);
+
+        if (!isReady) {
+            console.error('[Manager] Python server failed to start.');
+            if (activePythonProcess) activePythonProcess.kill();
+            activePythonProcess = null;
+        } else {
+            console.log('[Manager] Co-reference engine ready on port', pythonPort);
+            resetIdleTimer();
+        }
+    } catch (err) {
+        console.error('[Manager] Failed to start Python server:', err);
+    }
 }
 
 async function startApp() {
@@ -76,49 +122,13 @@ async function startApp() {
 
                         // Start Python server if not running
                         if (!activePythonProcess) {
-                            console.log('[Manager] No active Python server. Starting lazy process...');
-                            portfinder.basePort = PYTHON_BASE_PORT;
-                            pythonPort = await portfinder.getPortPromise();
+                            await ensurePythonServerRunning();
+                        }
 
-                            activePythonProcess = spawn('python', ['python_backend/main.py', '--port', pythonPort.toString()], {
-                                stdio: 'pipe',
-                                shell: true
-                            });
-
-                            activePythonProcess.stdout.on('data', (data) => {
-                                console.log(`[Python STDOUT] ${data}`);
-                            });
-                            activePythonProcess.stderr.on('data', (data) => {
-                                console.error(`[Python STDERR] ${data}`);
-                            });
-
-                            // Wait for readiness
-                            let isReady = false;
-                            for (let i = 0; i < 60; i++) {
-                                try {
-                                    const healthCheck = await new Promise((resolve) => {
-                                        const hReq = http.get(`http://localhost:${pythonPort}/health`, (hRes) => {
-                                            resolve(hRes.statusCode === 200);
-                                        });
-                                        hReq.on('error', () => resolve(false));
-                                        hReq.setTimeout(500, () => { hReq.destroy(); resolve(false); });
-                                    });
-                                    if (healthCheck) {
-                                        isReady = true;
-                                        break;
-                                    }
-                                } catch (e) { }
-                                await new Promise(r => setTimeout(r, 1000));
-                            }
-
-                            if (!isReady) {
-                                activePythonProcess.kill();
-                                activePythonProcess = null;
-                                res.writeHead(500, { 'Content-Type': 'application/json' });
-                                res.end(JSON.stringify({ error: 'Python server failed to start' }));
-                                return;
-                            }
-                            console.log('[Manager] Python server ready on port', pythonPort);
+                        if (!activePythonProcess) {
+                            res.writeHead(500, { 'Content-Type': 'application/json' });
+                            res.end(JSON.stringify({ error: 'Python server not available' }));
+                            return;
                         }
 
                         // Forward request
@@ -164,6 +174,8 @@ async function startApp() {
 
         server.listen(MANAGER_PORT, () => {
             console.log(`[Launcher] Co-reference Manager listening on port ${MANAGER_PORT}`);
+            // Start Python server eagerly
+            ensurePythonServerRunning();
         });
 
         // 3. Start Angular App

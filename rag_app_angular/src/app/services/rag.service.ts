@@ -211,24 +211,8 @@ export class RagService {
             // Co-reference Resolution
             try {
                 this.processingStatus.set(`Resolving co-references for ${file.name}...`);
-                console.log('Resolving co-references...');
-                const response = await fetch(this.corefUrl(), {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ text: content })
-                });
-
-                if (response.ok) {
-                    const data = await response.json();
-                    if (data.resolved_text) {
-                        content = data.resolved_text;
-                        console.log('Co-reference resolution complete.');
-                        this.corefStatus.set('ready');
-                    }
-                } else {
-                    console.warn('Co-reference API failed:', response.status);
-                    this.corefStatus.set('error');
-                }
+                content = await this.resolveCorefInChunks(content);
+                this.corefStatus.set('ready');
             } catch (e) {
                 console.warn('Co-reference resolution error:', e);
                 this.corefStatus.set('error');
@@ -273,18 +257,7 @@ export class RagService {
             // 1. Co-reference Resolution for the query (helps follow-up questions)
             try {
                 this.processingStatus.set('Resolving co-references in query...');
-                const corefResponse = await fetch(this.corefUrl(), {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ text: question })
-                });
-                if (corefResponse.ok) {
-                    const data = await corefResponse.json();
-                    if (data.resolved_text && data.resolved_text !== question) {
-                        processedQuestion = data.resolved_text;
-                        console.log('Query co-reference resolution complete:', processedQuestion);
-                    }
-                }
+                processedQuestion = await this.resolveCorefInChunks(question);
             } catch (e) {
                 console.warn('Query co-reference failed, using original:', e);
             }
@@ -348,6 +321,59 @@ export class RagService {
             console.warn('Query rewriting failed, using original:', e);
             return originalQuery;
         }
+    }
+
+    private async resolveCorefInChunks(text: string): Promise<string> {
+        const CHUNK_SIZE = 10000; // ~2000 words, safe for 1GB memory
+        const OVERLAP = 500;
+
+        if (text.length <= CHUNK_SIZE) {
+            return await this.callCorefApi(text);
+        }
+
+        console.log(`Text too large (${text.length} chars). processing in chunks...`);
+        const results: string[] = [];
+        let start = 0;
+        let chunkIdx = 1;
+
+        while (start < text.length) {
+            const end = Math.min(start + CHUNK_SIZE, text.length);
+            const chunk = text.substring(start, end);
+
+            console.log(`[Coref] Processing chunk ${chunkIdx} (${start} to ${end})...`);
+            this.processingStatus.update(s => s ? `${s} (Chunk ${chunkIdx})` : null);
+
+            try {
+                const resolved = await this.callCorefApi(chunk);
+                results.push(resolved);
+                console.log(`[Coref] Chunk ${chunkIdx} resolved.`);
+            } catch (e) {
+                console.warn(`[Coref] Chunk ${chunkIdx} failed, using original:`, e);
+                results.push(chunk);
+            }
+
+            if (end === text.length) break;
+            start += CHUNK_SIZE - OVERLAP;
+            chunkIdx++;
+        }
+        console.log(`[Coref] All ${chunkIdx} chunks processed.`);
+
+        // Simple join for now. For better results, we'd handle the overlap smartly.
+        // But for RAG, overlapping chunks is usually fine.
+        return results.join(' ');
+    }
+
+    private async callCorefApi(text: string): Promise<string> {
+        const response = await fetch(this.corefUrl(), {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ text })
+        });
+
+        if (!response.ok) throw new Error(`Coref API error: ${response.status}`);
+
+        const data = await response.json();
+        return data.resolved_text || text;
     }
 
     clearChat() {
