@@ -31,6 +31,7 @@ export class RagService {
     processingStatus = signal<string | null>(null);
     isChunkingEnabled = signal(true);
     isQueryRewritingEnabled = signal(false);
+    isRagEnabled = signal(localStorage.getItem('is_rag_enabled_ng') !== 'false'); // Default to true
     topK = signal(localStorage.getItem('top_k_ng') ? parseInt(localStorage.getItem('top_k_ng')!, 10) : 5);
     similarityThreshold = signal(localStorage.getItem('similarity_threshold_ng') ? parseFloat(localStorage.getItem('similarity_threshold_ng')!) : 0.75);
 
@@ -77,6 +78,9 @@ export class RagService {
         });
         effect(() => {
             localStorage.setItem('similarity_threshold_ng', String(this.similarityThreshold()));
+        });
+        effect(() => {
+            localStorage.setItem('is_rag_enabled_ng', String(this.isRagEnabled()));
         });
     }
 
@@ -253,32 +257,44 @@ export class RagService {
 
         try {
             let processedQuestion = question;
+            let context: string[] = [];
 
-            // 1. Co-reference Resolution for the query (helps follow-up questions)
-            try {
-                this.processingStatus.set('Resolving co-references in query...');
-                processedQuestion = await this.resolveCorefInChunks(question);
-            } catch (e) {
-                console.warn('Query co-reference failed, using original:', e);
+            if (this.isRagEnabled()) {
+                // 1. Co-reference Resolution for the query (helps follow-up questions)
+                try {
+                    this.processingStatus.set('Resolving co-references in query...');
+                    processedQuestion = await this.resolveCorefInChunks(question);
+                } catch (e) {
+                    console.warn('Query co-reference failed, using original:', e);
+                }
+
+                this.processingStatus.set('Searching knowledge base...');
+                const embedding = await this.apiService.getEmbedding(
+                    processedQuestion,
+                    this.localConfig().baseUrl,
+                    this.localConfig().embeddingModel || ''
+                );
+                const similarDocs = await this.vectorStore.searchSimilar(embedding, this.topK(), this.similarityThreshold());
+
+                if (similarDocs.length === 0) {
+                    this.messages.update(prev => [...prev, {
+                        role: 'assistant',
+                        content: `I couldn't find any relevant information in your documents with a high enough confidence (${(this.similarityThreshold() * 100).toFixed(0)}%+). Could you please try rephrasing your question or adding more context?`
+                    }]);
+                    return;
+                }
+
+                // Debug logging for chunks and precision
+                console.log(`[Search] Found ${similarDocs.length} relevant chunks:`);
+                similarDocs.forEach((res, i) => {
+                    console.log(`${i + 1}. [${(res.similarity * 100).toFixed(1)}%] ${res.doc.title}`);
+                });
+
+                context = similarDocs.map(res => res.doc.content);
+            } else {
+                console.log('[Chat] RAG disabled, sending direct question...');
             }
 
-            this.processingStatus.set('Searching knowledge base...');
-            const embedding = await this.apiService.getEmbedding(
-                processedQuestion,
-                this.localConfig().baseUrl,
-                this.localConfig().embeddingModel || ''
-            );
-            const similarDocs = await this.vectorStore.searchSimilar(embedding, this.topK(), this.similarityThreshold());
-
-            if (similarDocs.length === 0) {
-                this.messages.update(prev => [...prev, {
-                    role: 'assistant',
-                    content: `I couldn't find any relevant information in your documents with a high enough confidence (${(this.similarityThreshold() * 100).toFixed(0)}%+). Could you please try rephrasing your question or adding more context?`
-                }]);
-                return;
-            }
-
-            const context = similarDocs.map(d => d.content);
             const config = this.useCloud() ? this.cloudConfig() : this.localConfig();
 
             this.processingStatus.set('Synthesizing answer...');

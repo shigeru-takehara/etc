@@ -1,73 +1,59 @@
-# Please have 
-- node.js installed
-- npm installed
-- ng installed
-- python installed
-- python -m venv venv
-- venv\Scripts\activate
-- pip install -r requirements.txt
-- ng serve
+# RAG Assistant (Angular Edition)
 
-Also we need to have Cloud LLM API key or local LM Studio or Ollma running at local.
+A powerful, local-first Retrieval-Augmented Generation (RAG) assistant built with Angular 19 and a Python-based co-reference resolution engine.
 
-In local LLM, llama3.2 and nomic-text-embedding are used. It's all configurable on the screen.
+## 🚀 Quick Start
 
-# RagAppAngular
+To launch both the Angular frontend and the Python backend manager:
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 21.0.4.
-
-## Development server
-
-To start a local development server, run:
-
-```bash
-ng serve
+```powershell
+node start-app.js
 ```
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+The application will be available at `http://localhost:4200`.
 
-## Code scaffolding
+## ✨ Key Features
 
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
+- **Local & Cloud Support**: Seamlessly switch between local LLMs (Ollama, LM Studio) and Cloud APIs (OpenAI).
+- **Persistent Configuration**: Your settings, workspaces, and document indexes are automatically saved and restored on reload.
+- **Advanced RAG Features**:
+  - **Smart Split**: Intelligently chunks large PDFs to maintain high context relevance.
+  - **Smart Search**: Uses AI query re-writing to optimize search retrieval.
+  - **Co-reference Resolution**: A persistent Python backend resolves ambiguous nouns (e.g., "it", "they") for superior accuracy.
+  - **Dynamic Thresholding**: Real-time control over "Search Precision" and "Result Count".
+- **Local AI Privacy**: Co-reference models are stored locally in the project directory (`python_backend/models`).
+- **Memory Efficient**: Implements segment-based processing to keep memory usage under 2GB.
 
-```bash
-ng generate component component-name
+## 🛠️ Prerequisites
+
+### System Requirements
+- **Node.js**: v20+ 
+- **Python**: v3.10+
+- **Angular CLI**: `npm install -g @angular/cli`
+
+### Python Backend Setup
+```powershell
+pip install -r python_backend/requirements.txt
 ```
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
+### LLM Requirements
+- **Local**: Ollama or LM Studio running on `http://localhost:11434` or `http://localhost:1234`.
+- **Cloud**: A valid OpenAI-compatible API Key.
 
-```bash
-ng generate --help
-```
+## 📁 Project Structure
 
-## Building
+- `src/`: Angular frontend source code.
+- `python_backend/`: FastAPI server for co-reference resolution.
+- `start-app.js`: Unified launcher and backend manager.
+- `src/assets/backend-config.json`: Auto-generated configuration for service discovery.
 
-To build the project run:
+## ⚙️ Configuration Labels
 
-```bash
-ng build
-```
+- **Smart Split**: Prevents "lost in the middle" issues by segmenting large files.
+- **Smart Search**: Re-writes casual questions into keyword-rich search queries.
+- **Result Count (Top-K)**: Number of document fragments sent to the LLM.
+- **Search Precision**: The similarity threshold required for a document to be considered "relevant".
 
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
+---
 
-## Running unit tests
-
-To execute unit tests with the [Vitest](https://vitest.dev/) test runner, use the following command:
-
-```bash
-ng test
-```
-
-## Running end-to-end tests
-
-For end-to-end (e2e) testing, run:
-
-```bash
-ng e2e
-```
-
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
-
-## Additional Resources
-
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+Generated for **Advanced Agentic Coding** training.

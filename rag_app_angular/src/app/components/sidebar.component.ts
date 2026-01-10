@@ -14,7 +14,6 @@ import { Workspace } from '../services/persistence.service';
         <h1 class="text-xl font-bold bg-gradient-to-r from-primary-400 to-cyan-400 bg-clip-text text-transparent flex items-center gap-2" style="display: flex; align-items: center;">
           <lucide-icon [name]="'cpu'" class="text-primary-500"></lucide-icon> RAG Assistant
         </h1>
-        <p class="text-[10px] text-slate-500 mt-1 uppercase tracking-widest font-bold">Angular Edition</p>
       </div>
 
       <div class="sidebar-content">
@@ -110,9 +109,22 @@ import { Workspace } from '../services/persistence.service';
         <div style="margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid rgba(30, 41, 59, 0.5);">
           <label class="text-xs font-semibold text-slate-500 uppercase tracking-wider px-2 block" style="display: block; margin-bottom: 1rem;">Configuration</label>
           
-          <div style="display: flex; align-items: center; justify-content: space-between; padding: 0 0.5rem 1rem;">
+          <div style="display: flex; align-items: center; justify-content: space-between; padding: 0 0.5rem 1rem;" title="Enable or disable document retrieval for your questions.">
+            <span style="font-size: 0.875rem; color: #cbd5e1; display: flex; align-items: center; gap: 0.5rem; font-weight: 500;">
+              <lucide-icon [name]="'database'" style="color: #0ea5e9;" [size]="16"></lucide-icon> ENABLE KNOWLEDGE
+            </span>
+            <button 
+              (click)="ragService.isRagEnabled.set(!isRagEnabled())"
+              style="width: 2.5rem; height: 1.25rem; border-radius: 9999px; border: none; cursor: pointer; position: relative; transition: background 0.2s;"
+              [ngStyle]="{'background': isRagEnabled() ? '#0ea5e9' : '#334155'}"
+            >
+              <div style="position: absolute; top: 0.25rem; width: 0.75rem; height: 0.75rem; background: white; border-radius: 9999px; transition: left 0.2s;" [ngStyle]="{'left': isRagEnabled() ? '1.5rem' : '0.25rem'}"></div>
+            </button>
+          </div>
+
+          <div style="display: flex; align-items: center; justify-content: space-between; padding: 0 0.5rem 1rem;" title="Automatically divides large documents into smaller parts for better search results.">
             <span style="font-size: 0.875rem; color: #cbd5e1; display: flex; align-items: center; gap: 0.5rem;">
-              <lucide-icon [name]="'layers'" style="color: #64748b;" [size]="16"></lucide-icon> Chunking
+              <lucide-icon [name]="'layers'" style="color: #64748b;" [size]="16"></lucide-icon> Smart Split
             </span>
             <button 
               (click)="ragService.isChunkingEnabled.set(!isChunkingEnabled())"
@@ -123,7 +135,7 @@ import { Workspace } from '../services/persistence.service';
             </button>
           </div>
 
-          <div style="display: flex; align-items: center; justify-content: space-between; padding: 0 0.5rem 1rem;">
+          <div style="display: flex; align-items: center; justify-content: space-between; padding: 0 0.5rem 1rem;" title="Uses AI to rephrase your questions for more accurate results.">
             <span style="font-size: 0.875rem; color: #cbd5e1; display: flex; align-items: center; gap: 0.5rem;">
               <lucide-icon [name]="'sparkles'" style="color: #64748b;" [size]="16"></lucide-icon> Smart Search
             </span>
@@ -136,10 +148,10 @@ import { Workspace } from '../services/persistence.service';
             </button>
           </div>
 
-          <div style="padding: 0 0.5rem 1rem;">
+          <div style="padding: 0 0.5rem 1rem;" title="Maximum number of relevant document segments to find.">
             <div style="display: flex; justify-content: space-between; font-size: 0.875rem; color: #cbd5e1; margin-bottom: 0.5rem;">
               <span style="display: flex; align-items: center; gap: 0.5rem;">
-                <lucide-icon [name]="'search'" style="color: #64748b;" [size]="16"></lucide-icon> Top-K
+                <lucide-icon [name]="'search'" style="color: #64748b;" [size]="16"></lucide-icon> Result Count
               </span>
               <span style="color: #38bdf8; font-family: monospace; font-size: 0.75rem;">{{ topK() }}</span>
             </div>
@@ -150,10 +162,10 @@ import { Workspace } from '../services/persistence.service';
             />
           </div>
 
-          <div style="padding: 0 0.5rem 1rem;">
+          <div style="padding: 0 0.5rem 1rem;" title="Minimum confidence level required to select a document segment.">
             <div style="display: flex; justify-content: space-between; font-size: 0.875rem; color: #cbd5e1; margin-bottom: 0.5rem;">
               <span style="display: flex; align-items: center; gap: 0.5rem;">
-                <lucide-icon [name]="'target'" style="color: #64748b;" [size]="16"></lucide-icon> Threshold
+                <lucide-icon [name]="'target'" style="color: #64748b;" [size]="16"></lucide-icon> Search Precision
               </span>
               <span style="color: #38bdf8; font-family: monospace; font-size: 0.75rem;">{{ (similarityThreshold() * 100).toFixed(0) }}%</span>
             </div>
@@ -164,7 +176,7 @@ import { Workspace } from '../services/persistence.service';
             />
           </div>
 
-          <div style="display: flex; align-items: center; justify-content: space-between; padding: 0 0.5rem;">
+          <div style="display: flex; align-items: center; justify-content: space-between; padding: 0 0.5rem;" title="Switch between local LLM and cloud-based models.">
             <span style="font-size: 0.875rem; color: #cbd5e1; display: flex; align-items: center; gap: 0.5rem;">
               <lucide-icon [name]="'cpu'" style="color: #64748b;" [size]="16"></lucide-icon> {{ useCloud() ? 'Cloud mode' : 'Local mode' }}
             </span>
@@ -200,6 +212,7 @@ export class SidebarComponent {
   activeWorkspace = this.ragService.activeWorkspace;
   isChunkingEnabled = this.ragService.isChunkingEnabled;
   isQueryRewritingEnabled = this.ragService.isQueryRewritingEnabled;
+  isRagEnabled = this.ragService.isRagEnabled;
   topK = this.ragService.topK;
   similarityThreshold = this.ragService.similarityThreshold;
   useCloud = this.ragService.useCloud;
