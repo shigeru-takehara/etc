@@ -18,6 +18,16 @@ os.environ["TRANSFORMERS_CACHE"] = models_dir
 os.environ["HF_HOME"] = models_dir
 os.environ["TORCH_HOME"] = models_dir
 
+# Check if model already exists locally to enable offline mode
+# The model name is 'biu-nlp/f-coref' which transforms to 'models--biu-nlp--f-coref' in cache
+model_path = os.path.join(models_dir, "models--biu-nlp--f-coref")
+if os.path.exists(model_path):
+    print(f"Local model found at {model_path}. Enabling offline mode to skip HTTPS calls.")
+    os.environ["TRANSFORMERS_OFFLINE"] = "1"
+    os.environ["HF_HUB_OFFLINE"] = "1"
+else:
+    print(f"Local model not found at {model_path}. Will download on first run.")
+
 from fastcoref import FCoref
 
 # Initialize the model (this will download the model to the local models_dir on first run)
