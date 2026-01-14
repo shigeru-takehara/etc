@@ -4,11 +4,7 @@ import { ChunkingService } from './chunking.service';
 import { FileIngestionService } from './file-ingestion.service';
 import { VectorStoreService, DocumentEntry } from './vector-store.service';
 import { PersistenceService, Workspace } from './persistence.service';
-
-export interface Message {
-    role: 'user' | 'assistant';
-    content: string;
-}
+import { Message, CHAT_ROLES } from '../models/chat.model';
 
 export interface RagConfig {
     baseUrl: string;
@@ -251,7 +247,7 @@ export class RagService {
     }
 
     async askQuestion(question: string) {
-        this.messages.update(prev => [...prev, { role: 'user', content: question }]);
+        this.messages.update(prev => [...prev, { role: CHAT_ROLES.USER, content: question }]);
         this.isProcessing.set(true);
         this.processingStatus.set('Preparing query...');
 
@@ -278,7 +274,7 @@ export class RagService {
 
                 if (similarDocs.length === 0) {
                     this.messages.update(prev => [...prev, {
-                        role: 'assistant',
+                        role: CHAT_ROLES.ASSISTANT,
                         content: `I couldn't find any relevant information in your documents with a high enough confidence (${(this.similarityThreshold() * 100).toFixed(0)}%+). Could you please try rephrasing your question or adding more context?`
                     }]);
                     return;
@@ -306,9 +302,9 @@ export class RagService {
                 apiKey: this.useCloud() ? this.cloudConfig().apiKey : undefined,
                 temperature: config.temperature
             });
-            this.messages.update(prev => [...prev, { role: 'assistant', content: answer }]);
+            this.messages.update(prev => [...prev, { role: CHAT_ROLES.ASSISTANT, content: answer }]);
         } catch (e) {
-            this.messages.update(prev => [...prev, { role: 'assistant', content: `Error: ${e instanceof Error ? e.message : 'Unknown error'}` }]);
+            this.messages.update(prev => [...prev, { role: CHAT_ROLES.ASSISTANT, content: `Error: ${e instanceof Error ? e.message : 'Unknown error'}` }]);
         } finally {
             this.isProcessing.set(false);
             this.processingStatus.set(null);

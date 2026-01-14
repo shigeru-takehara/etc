@@ -5,9 +5,12 @@ import { FormsModule } from '@angular/forms';
 import { LucideAngularModule } from 'lucide-angular';
 import { SidebarComponent } from './components/sidebar.component';
 import { SettingDialogComponent } from './components/sidebar/setting/setting-dialog.component';
-import { ChatBubbleComponent } from './components/chat-bubble.component';
+import { UserBubbleComponent } from './components/chat/user-bubble.component';
+import { AssistantBubbleComponent } from './components/chat/assistant-bubble.component';
 import { ProcessingOverlayComponent } from './components/main/processing-overlay.component';
+import { WelcomeHeaderComponent } from './components/main/welcome-header.component';
 import { RagService } from './services/rag.service';
+import { CHAT_ROLES } from './models/chat.model';
 
 @Component({
   selector: 'app-root',
@@ -18,8 +21,10 @@ import { RagService } from './services/rag.service';
     LucideAngularModule,
     SidebarComponent,
     SettingDialogComponent,
-    ChatBubbleComponent,
-    ProcessingOverlayComponent
+    UserBubbleComponent,
+    AssistantBubbleComponent,
+    ProcessingOverlayComponent,
+    WelcomeHeaderComponent
   ],
   template: `
     <div class="app-container">
@@ -40,31 +45,12 @@ import { RagService } from './services/rag.service';
           <div class="chat-container">
             
             <!-- Welcome Header -->
-            <div *ngIf="messages().length === 0" class="flex flex-col items-center justify-center py-20 text-center space-y-6">
-              <div class="p-6 bg-slate-900 border border-slate-800 rounded-3xl shadow-2xl relative group">
-                <div class="absolute -inset-1 bg-gradient-to-r from-primary-500 to-cyan-500 rounded-3xl blur opacity-20 group-hover:opacity-40 transition duration-1000"></div>
-                <lucide-icon [name]="'message-square'" [size]="48" class="text-primary-500 relative"></lucide-icon>
-              </div>
-              <div class="space-y-2">
-                <h2 class="text-3xl font-bold text-white tracking-tight">AI Knowledge Assistant</h2>
-                <p class="text-slate-400 max-w-md mx-auto leading-relaxed">
-                  Upload documents to create your local knowledge base. Search and reason over your data securely.
-                </p>
-              </div>
-              <div class="flex items-center gap-6 pt-4">
-                <div class="flex items-center gap-2 text-[10px] font-bold text-slate-500 uppercase tracking-widest">
-                  <lucide-icon [name]="'shield-check'" [size]="14"></lucide-icon> 100% Local Privacy
-                </div>
-                <div class="w-1 h-1 bg-slate-800 rounded-full"></div>
-                <div class="flex items-center gap-2 text-[10px] font-bold text-slate-500 uppercase tracking-widest leading-none">
-                  High Performance
-                </div>
-              </div>
-            </div>
+            <app-welcome-header *ngIf="messages().length === 0"></app-welcome-header>
 
             <!-- Messages -->
             @for (msg of messages(); track $index) {
-              <app-chat-bubble [message]="msg"></app-chat-bubble>
+              <app-user-bubble *ngIf="msg.role === CHAT_ROLES.USER" [content]="msg.content"></app-user-bubble>
+              <app-assistant-bubble *ngIf="msg.role === CHAT_ROLES.ASSISTANT" [content]="msg.content"></app-assistant-bubble>
             }
           </div>
         </div>
@@ -108,6 +94,7 @@ import { RagService } from './services/rag.service';
 })
 export class App implements AfterViewChecked {
   private ragService = inject(RagService);
+  CHAT_ROLES = CHAT_ROLES;
 
   @ViewChild('scrollContainer') private scrollContainer!: ElementRef;
 
