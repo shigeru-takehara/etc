@@ -3,7 +3,7 @@ import { Component, signal, ViewChild, ElementRef, AfterViewChecked, inject } fr
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { LucideAngularModule } from 'lucide-angular';
-import { SidebarComponent } from './components/sidebar.component';
+import { SidebarComponent } from './components/sidebar/sidebar.component';
 import { SettingDialogComponent } from './components/sidebar/setting/setting-dialog.component';
 import { UserBubbleComponent } from './components/chat/user-bubble.component';
 import { AssistantBubbleComponent } from './components/chat/assistant-bubble.component';
