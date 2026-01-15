@@ -7,6 +7,7 @@ import { SidebarComponent } from './components/sidebar.component';
 import { SettingDialogComponent } from './components/sidebar/setting/setting-dialog.component';
 import { UserBubbleComponent } from './components/chat/user-bubble.component';
 import { AssistantBubbleComponent } from './components/chat/assistant-bubble.component';
+import { ChatInputComponent } from './components/chat/chat-input.component';
 import { ProcessingOverlayComponent } from './components/main/processing-overlay.component';
 import { WelcomeHeaderComponent } from './components/main/welcome-header.component';
 import { RagService } from './services/rag.service';
@@ -23,6 +24,7 @@ import { CHAT_ROLES } from './models/chat.model';
     SettingDialogComponent,
     UserBubbleComponent,
     AssistantBubbleComponent,
+    ChatInputComponent,
     ProcessingOverlayComponent,
     WelcomeHeaderComponent
   ],
@@ -56,33 +58,12 @@ import { CHAT_ROLES } from './models/chat.model';
         </div>
 
         <!-- Input Area -->
-        <div class="input-wrapper">
-          <div class="input-container">
-            <input 
-              type="text" 
-              [(ngModel)]="userInput"
-              name="userInput"
-              placeholder="Ask your documents anything..." 
-              class="chat-input"
-              [disabled]="isProcessing()"
-              (keyup.enter)="handleSubmit($event)"
-            />
-            <button 
-              type="button"
-              (click)="handleSubmit($event)"
-              [disabled]="!userInput.trim() || isProcessing()"
-              class="btn-primary"
-              style="padding: 0.5rem 1rem; margin-right: 0.5rem;"
-            >
-              <lucide-icon *ngIf="!isProcessing()" [name]="'send'" [size]="20"></lucide-icon>
-              <lucide-icon *ngIf="isProcessing()" [name]="'loader-2'" class="animate-spin" [size]="20"></lucide-icon>
-            </button>
-          </div>
-          <p class="text-center mt-2 text-[10px] uppercase tracking-[0.2em] font-medium" 
-             [ngClass]="rewriteStatus() ? 'text-primary-400 animate-pulse' : 'text-slate-500'">
-            {{ rewriteStatus() || 'Powered by Local Intelligence' }}
-          </p>
-        </div>
+        <app-chat-input 
+          [(userInput)]="userInput" 
+          [isProcessing]="isProcessing()" 
+          [rewriteStatus]="rewriteStatus()"
+          (submit)="handleSubmit()"
+        ></app-chat-input>
       </main>
 
       <app-setting-dialog 
@@ -118,8 +99,7 @@ export class App implements AfterViewChecked {
     } catch (err) { }
   }
 
-  async handleSubmit(e: Event) {
-    e.preventDefault();
+  async handleSubmit() {
     if (!this.userInput.trim() || this.isProcessing()) return;
 
     // Smart Search Logic

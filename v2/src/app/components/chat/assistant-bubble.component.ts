@@ -1,6 +1,6 @@
 import { Component, input } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ChatBubbleBaseComponent } from './chat-bubble-base.component';
+import { ChatBubbleBaseComponent } from '../base/chat-bubble-base.component';
 import { CHAT_ROLES } from '../../models/chat.model';
 
 @Component({
