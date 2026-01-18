@@ -4,10 +4,10 @@ import { ChatBubbleBaseComponent } from '../base/chat-bubble-base.component';
 import { CHAT_ROLES } from '../../models/chat.model';
 
 @Component({
-    selector: 'app-user-bubble',
-    standalone: true,
-    imports: [CommonModule, ChatBubbleBaseComponent],
-    template: `
+  selector: 'app-user-bubble',
+  standalone: true,
+  imports: [CommonModule, ChatBubbleBaseComponent],
+  template: `
     <app-chat-bubble-base
       [role]="CHAT_ROLES.USER"
       iconName="user"
@@ -17,6 +17,6 @@ import { CHAT_ROLES } from '../../models/chat.model';
   `
 })
 export class UserBubbleComponent {
-    CHAT_ROLES = CHAT_ROLES;
-    content = input.required<string>();
+  CHAT_ROLES = CHAT_ROLES;
+  content = input.required<string>();
 }

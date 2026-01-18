@@ -4,10 +4,10 @@ import { LucideAngularModule } from 'lucide-angular';
 import { TabBaseComponent } from './tab-base.component';
 
 @Component({
-    selector: 'app-tabs-base',
-    standalone: true,
-    imports: [CommonModule, LucideAngularModule],
-    template: `
+  selector: 'app-tabs-base',
+  standalone: true,
+  imports: [CommonModule, LucideAngularModule],
+  template: `
     <div class="tabs-container">
       <!-- Tab Header -->
       <div class="tabs-header">
@@ -32,12 +32,12 @@ import { TabBaseComponent } from './tab-base.component';
       </div>
     </div>
   `,
-    styles: [`
+  styles: [`
     .tabs-container { display: flex; flex-direction: column; height: 100%; }
     
     .tabs-header { 
       display: flex; 
-      border-bottom: 1px solid #1e293b; 
+      border-bottom: 1px solid var(--border-slate); 
       background: rgba(15, 23, 42, 0.3);
     }
     
@@ -52,19 +52,19 @@ import { TabBaseComponent } from './tab-base.component';
       border: none; 
       cursor: pointer; 
       position: relative;
-      color: #94a3b8;
-      transition: all 0.2s;
+      color: var(--text-muted);
+      transition: var(--transition);
       font-weight: 500;
     }
     
     .tab-btn:hover {
-      color: #cbd5e1;
-      background: rgba(56, 189, 248, 0.02);
+      color: var(--text-main);
+      background: rgba(14, 165, 233, 0.02);
     }
     
     .tab-btn.active {
-      color: #38bdf8;
-      background: rgba(56, 189, 248, 0.05);
+      color: var(--primary);
+      background: var(--primary-bg);
     }
     
     .active-indicator {
@@ -73,8 +73,8 @@ import { TabBaseComponent } from './tab-base.component';
       left: 0;
       right: 0;
       height: 2px;
-      background: #38bdf8;
-      box-shadow: 0 -2px 10px rgba(56, 189, 248, 0.3);
+      background: var(--primary);
+      box-shadow: 0 -2px 10px rgba(14, 165, 233, 0.3);
     }
     
     .tab-label { font-size: 0.875rem; }
@@ -83,12 +83,12 @@ import { TabBaseComponent } from './tab-base.component';
   `]
 })
 export class TabsBaseComponent {
-    activeId = input.required<string>();
-    activeIdChange = output<string>();
+  activeId = input.required<string>();
+  activeIdChange = output<string>();
 
-    tabs = contentChildren(TabBaseComponent);
+  tabs = contentChildren(TabBaseComponent);
 
-    selectTab(id: string) {
-        this.activeIdChange.emit(id);
-    }
+  selectTab(id: string) {
+    this.activeIdChange.emit(id);
+  }
 }
