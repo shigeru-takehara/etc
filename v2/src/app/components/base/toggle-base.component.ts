@@ -1,11 +1,12 @@
 import { Component, input, output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { LucideAngularModule } from 'lucide-angular';
+import { AppToggleComponent } from './app-toggle.component';
 
 @Component({
   selector: 'app-toggle-base',
   standalone: true,
-  imports: [CommonModule, LucideAngularModule],
+  imports: [CommonModule, LucideAngularModule, AppToggleComponent],
   template: `
     <div 
       class="toggle-row" 
@@ -15,24 +16,17 @@ import { LucideAngularModule } from 'lucide-angular';
         <lucide-icon [name]="iconName()" [style.color]="iconColor()" [size]="16"></lucide-icon>
         {{ label() }}
       </span>
-      <button 
-        (click)="toggle.emit()"
-        class="toggle-container"
-        [style.background]="isActive() ? activeBg() : '#334155'"
-      >
-        <div 
-          class="toggle-thumb" 
-          [style.left]="isActive() ? '1.5rem' : '0.25rem'"
-        ></div>
-      </button>
+      <app-toggle
+        [active]="isActive()"
+        [activeBg]="activeBg()"
+        (toggle)="toggle.emit()"
+      ></app-toggle>
     </div>
   `,
   styles: [`
     :host { display: block; }
     .toggle-row { display: flex; align-items: center; justify-content: space-between; padding: 0 0.5rem 1rem; }
     .label-text { font-size: 0.875rem; color: #cbd5e1; display: flex; align-items: center; gap: 0.5rem; font-weight: 500; }
-    .toggle-container { width: 2.5rem; height: 1.25rem; border-radius: 9999px; border: none; cursor: pointer; position: relative; transition: background 0.2s; }
-    .toggle-thumb { position: absolute; top: 0.25rem; width: 0.75rem; height: 0.75rem; background: white; border-radius: 9999px; transition: left 0.2s; }
   `]
 })
 export class ToggleBaseComponent {
