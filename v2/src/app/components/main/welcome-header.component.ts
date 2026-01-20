@@ -3,10 +3,10 @@ import { CommonModule } from '@angular/common';
 import { LucideAngularModule } from 'lucide-angular';
 
 @Component({
-    selector: 'app-welcome-header',
-    standalone: true,
-    imports: [CommonModule, LucideAngularModule],
-    template: `
+  selector: 'app-welcome-header',
+  standalone: true,
+  imports: [CommonModule, LucideAngularModule],
+  template: `
     <div class="flex flex-col items-center justify-center py-20 text-center space-y-6">
       <div class="p-6 bg-slate-900 border border-slate-800 rounded-3xl shadow-2xl relative group">
         <div class="absolute -inset-1 bg-gradient-to-r from-primary-500 to-cyan-500 rounded-3xl blur opacity-20 group-hover:opacity-40 transition duration-1000"></div>
@@ -19,15 +19,20 @@ import { LucideAngularModule } from 'lucide-angular';
         </p>
       </div>
       <div class="flex items-center gap-6 pt-4">
-        <div class="flex items-center gap-2 text-[10px] font-bold text-slate-500 uppercase tracking-widest">
+        <div class="badge-label">
           <lucide-icon [name]="'shield-check'" [size]="14"></lucide-icon> 100% Local Privacy
         </div>
         <div class="w-1 h-1 bg-slate-800 rounded-full"></div>
-        <div class="flex items-center gap-2 text-[10px] font-bold text-slate-500 uppercase tracking-widest leading-none">
+        <div class="badge-label">
           High Performance
         </div>
       </div>
     </div>
-  `
+  `,
+  styles: [`
+    .badge-label {
+      @apply flex items-center gap-2 text-[10px] font-bold text-slate-500 uppercase tracking-widest;
+    }
+  `]
 })
 export class WelcomeHeaderComponent { }
