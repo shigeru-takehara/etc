@@ -1,3 +1,20 @@
+/**
+ * Base Chat Bubble Component
+ * 
+ * Usage:
+ * <app-chat-bubble-base
+ *   [role]="CHAT_ROLES.USER"
+ *   iconName="user"
+ *   label="You"
+ *   [content]="messageText"
+ * ></app-chat-bubble-base>
+ * 
+ * Inputs:
+ * - role (required): ChatRole - determines the bubble's styling (user vs assistant)
+ * - iconName (required): string - lucide icon name for the bubble
+ * - label (required): string - display name shown above the content
+ * - content (required): string - markdown text to render inside the bubble
+ */
 import { Component, input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { LucideAngularModule } from 'lucide-angular';

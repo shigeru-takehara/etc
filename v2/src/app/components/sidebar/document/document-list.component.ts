@@ -5,10 +5,10 @@ import { DocumentItemComponent } from './document-item.component';
 import { RagService } from '../../../services/rag.service';
 
 @Component({
-    selector: 'app-document-list',
-    standalone: true,
-    imports: [CommonModule, LucideAngularModule, DocumentItemComponent],
-    template: `
+  selector: 'app-document-list',
+  standalone: true,
+  imports: [CommonModule, LucideAngularModule, DocumentItemComponent],
+  template: `
     <div>
       <label class="text-xs font-semibold text-slate-500 uppercase tracking-wider px-2 mb-3 block" 
              style="display: block; margin-bottom: 0.75rem;">Documents</label>
@@ -16,6 +16,7 @@ import { RagService } from '../../../services/rag.service';
         (click)="fileInput.click()"
         class="btn-primary"
         style="width: 100%;"
+        title="Supported formats: PDF, DOCX, Markdown, Text"
       >
         <lucide-icon [name]="'plus'" [size]="18"></lucide-icon>
         <span>Update Knowledge</span>
@@ -36,7 +37,7 @@ import { RagService } from '../../../services/rag.service';
       </div>
     </div>
   `,
-    styles: [`
+  styles: [`
     :host { display: block; }
     .btn-primary {
       @apply flex items-center justify-center gap-2 px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors font-medium text-sm;
@@ -45,28 +46,28 @@ import { RagService } from '../../../services/rag.service';
   `]
 })
 export class DocumentListComponent {
-    documents = input.required<any[]>();
-    deleteDocument = output<{ id: string, sourceId: string }>();
-    fileUpload = output<File>();
+  documents = input.required<any[]>();
+  deleteDocument = output<{ id: string, sourceId: string }>();
+  fileUpload = output<File>();
 
-    uniqueDocs = (): any[] => {
-        const docs = this.documents();
-        return Object.values(docs.reduce((acc: any, doc: any) => {
-            if (!acc[doc.sourceId]) acc[doc.sourceId] = doc;
-            return acc;
-        }, {} as Record<string, any>));
-    };
+  uniqueDocs = (): any[] => {
+    const docs = this.documents();
+    return Object.values(docs.reduce((acc: any, doc: any) => {
+      if (!acc[doc.sourceId]) acc[doc.sourceId] = doc;
+      return acc;
+    }, {} as Record<string, any>));
+  };
 
-    getChunkCount(sourceId: string): number {
-        return this.documents().filter((d: any) => d.sourceId === sourceId).length;
+  getChunkCount(sourceId: string): number {
+    return this.documents().filter((d: any) => d.sourceId === sourceId).length;
+  }
+
+  handleFileChange(e: Event) {
+    const input = e.target as HTMLInputElement;
+    const file = input.files?.[0];
+    if (file) {
+      this.fileUpload.emit(file);
+      input.value = '';
     }
-
-    handleFileChange(e: Event) {
-        const input = e.target as HTMLInputElement;
-        const file = input.files?.[0];
-        if (file) {
-            this.fileUpload.emit(file);
-            input.value = '';
-        }
-    }
+  }
 }

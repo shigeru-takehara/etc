@@ -1,19 +1,43 @@
+/**
+ * Base Slider Component with Label, Icon and Value Display
+ * 
+ * Usage:
+ * <app-slider-base
+ *   label="Volume"
+ *   iconName="volume-2"
+ *   [value]="volume"
+ *   [displayValue]="volume + '%'"
+ *   (valueChange)="volume = $event"
+ * ></app-slider-base>
+ * 
+ * Inputs:
+ * - label (required): string - text label next to slider
+ * - iconName (required): string - lucide icon name
+ * - tooltip (optional): string - help text for the row
+ * - value (required): number - actual slider value
+ * - displayValue (required): string | number - formatted value to show in UI
+ * - min/max/step (optional): numbers for range configuration
+ * 
+ * Outputs:
+ * - valueChange: number - emitted when slider value is updated
+ */
 import { Component, input, output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { LucideAngularModule } from 'lucide-angular';
 import { AppSliderComponent } from './app-slider.component';
+import { IconTitleBaseComponent } from './icon-title-base.component';
 
 @Component({
   selector: 'app-slider-base',
   standalone: true,
-  imports: [CommonModule, LucideAngularModule, AppSliderComponent],
+  imports: [CommonModule, LucideAngularModule, AppSliderComponent, IconTitleBaseComponent],
   template: `
     <div class="slider-row" [title]="tooltip()">
       <div class="slider-header">
-        <span class="label-text">
-          <lucide-icon [name]="iconName()" style="color: #64748b;" [size]="16"></lucide-icon>
-          {{ label() }}
-        </span>
+        <app-icon-title-base
+          [iconName]="iconName()"
+          [label]="label()"
+        ></app-icon-title-base>
         <span class="value-display">{{ displayValue() }}</span>
       </div>
       <app-slider

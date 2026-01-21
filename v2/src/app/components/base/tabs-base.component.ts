@@ -1,3 +1,17 @@
+/**
+ * Reusable Tabs Container Component
+ * 
+ * Usage:
+ * <app-tabs-base [activeId]="currentTab" (activeIdChange)="currentTab = $event">
+ *   <app-tab-base id="tab1" label="Tab 1" icon="settings">...</app-tab-base>
+ * </app-tabs-base>
+ * 
+ * Inputs:
+ * - activeId (required): string - ID of the currently active tab
+ * 
+ * Outputs:
+ * - activeIdChange: string - emitted when a different tab is selected
+ */
 import { Component, input, output, contentChildren } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { LucideAngularModule } from 'lucide-angular';
@@ -79,7 +93,12 @@ import { TabBaseComponent } from './tab-base.component';
     
     .tab-label { font-size: 0.875rem; }
     
-    .tabs-content { flex: 1; padding-top: 1.5rem; }
+    .tabs-content { 
+      flex: 1; 
+      padding-top: 1.5rem; 
+      overflow-y: auto;
+      min-height: 0;
+    }
   `]
 })
 export class TabsBaseComponent {

@@ -1,21 +1,45 @@
+/**
+ * Base Toggle Component with Label and Icon
+ * 
+ * Usage:
+ * <app-toggle-base
+ *   label="Enable Feature"
+ *   iconName="shield"
+ *   [isActive]="featureEnabled"
+ *   (toggle)="featureEnabled = !featureEnabled"
+ * ></app-toggle-base>
+ * 
+ * Inputs:
+ * - label (required): string - text label next to toggle
+ * - iconName (required): string - lucide icon name
+ * - iconColor (optional): string - color of the icon (default: #64748b)
+ * - tooltip (optional): string - help text for the row
+ * - isActive (required): boolean - current state
+ * - activeBg (optional): string - background color when active (default: #0ea5e9)
+ * 
+ * Outputs:
+ * - toggle: void - emitted when the toggle is clicked
+ */
 import { Component, input, output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { LucideAngularModule } from 'lucide-angular';
 import { AppToggleComponent } from './app-toggle.component';
+import { IconTitleBaseComponent } from './icon-title-base.component';
 
 @Component({
   selector: 'app-toggle-base',
   standalone: true,
-  imports: [CommonModule, LucideAngularModule, AppToggleComponent],
+  imports: [CommonModule, LucideAngularModule, AppToggleComponent, IconTitleBaseComponent],
   template: `
     <div 
       class="toggle-row" 
       [title]="tooltip()"
     >
-      <span class="label-text">
-        <lucide-icon [name]="iconName()" [style.color]="iconColor()" [size]="16"></lucide-icon>
-        {{ label() }}
-      </span>
+      <app-icon-title-base
+        [iconName]="iconName()"
+        [label]="label()"
+        [iconColor]="iconColor()"
+      ></app-icon-title-base>
       <app-toggle
         [active]="isActive()"
         [activeBg]="activeBg()"

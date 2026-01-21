@@ -1,26 +1,26 @@
-import { Component, input, output } from '@angular/core';
+import { Component, input, output, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { LucideAngularModule } from 'lucide-angular';
+import { IconTitleBaseComponent } from '../../base/icon-title-base.component';
 
 @Component({
-    selector: 'app-test-connection-button',
-    standalone: true,
-    imports: [CommonModule, LucideAngularModule],
-    template: `
+  selector: 'app-test-connection-button',
+  standalone: true,
+  imports: [CommonModule, LucideAngularModule, IconTitleBaseComponent],
+  template: `
     <button 
       (click)="test.emit()" 
       class="test-btn"
       [disabled]="testing()"
     >
-      <lucide-icon 
-        [name]="status() === 'success' ? 'check' : (status() === 'error' ? 'alert-circle' : 'activity')" 
-        [size]="16"
-        [style.color]="status() === 'success' ? '#4ade80' : (status() === 'error' ? '#f87171' : '#94a3b8')"
-      ></lucide-icon>
-      {{ testing() ? 'Testing...' : (status() === 'success' ? 'Connection Verified' : (status() === 'error' ? 'Connection Failed' : label())) }}
+      <app-icon-title-base
+        [iconName]="view().icon"
+        [label]="view().label"
+        [iconColor]="view().color"
+      ></app-icon-title-base>
     </button>
   `,
-    styles: [`
+  styles: [`
     .test-btn {
       width: 100%;
       padding: 0.75rem;
@@ -48,8 +48,23 @@ import { LucideAngularModule } from 'lucide-angular';
   `]
 })
 export class TestConnectionButtonComponent {
-    label = input.required<string>();
-    testing = input.required<boolean>();
-    status = input.required<'idle' | 'success' | 'error'>();
-    test = output<void>();
+  label = input.required<string>();
+  testing = input.required<boolean>();
+  status = input.required<'idle' | 'success' | 'error'>();
+  test = output<void>();
+
+  view = computed(() => {
+    if (this.testing()) {
+      return { icon: 'activity', color: '#94a3b8', label: 'Testing...' };
+    }
+
+    switch (this.status()) {
+      case 'success':
+        return { icon: 'check', color: '#4ade80', label: 'Connection Verified' };
+      case 'error':
+        return { icon: 'alert-circle', color: '#f87171', label: 'Connection Failed' };
+      default:
+        return { icon: 'activity', color: '#94a3b8', label: this.label() };
+    }
+  });
 }

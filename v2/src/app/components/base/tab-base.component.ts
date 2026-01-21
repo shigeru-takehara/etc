@@ -1,3 +1,16 @@
+/**
+ * Individual Tab Content Component (to be used within app-tabs-base)
+ * 
+ * Usage:
+ * <app-tab-base id="settings" label="Settings" icon="settings">
+ *   <div>Settings content...</div>
+ * </app-tab-base>
+ * 
+ * Inputs:
+ * - id (required): string - unique identifier for the tab
+ * - label (required): string - display name for the tab
+ * - icon (required): string - lucide icon name for the tab header
+ */
 import { Component, input, inject, computed, HostBinding } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { TabsBaseComponent } from './tabs-base.component';

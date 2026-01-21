@@ -7,6 +7,8 @@ import { TabBaseComponent } from '../../base/tab-base.component';
 import { LocalSettingFormComponent } from './local-setting-form.component';
 import { CloudSettingFormComponent } from './cloud-setting-form.component';
 import { AdvancedSettingForm } from './advanced-setting-form.component';
+import { CloseIconButtonComponent } from './close-icon-button.component';
+import { IconTitleBaseComponent } from '../../base/icon-title-base.component';
 
 @Component({
   selector: 'app-setting-dialog',
@@ -18,24 +20,26 @@ import { AdvancedSettingForm } from './advanced-setting-form.component';
     TabBaseComponent,
     LocalSettingFormComponent,
     CloudSettingFormComponent,
-    AdvancedSettingForm
+    AdvancedSettingForm,
+    CloseIconButtonComponent,
+    IconTitleBaseComponent
   ],
   template: `
     <div *ngIf="isOpen()" class="modal-overlay">
       <div class="modal-content animate-in fade-in zoom-in duration-200">
         <!-- Header -->
         <div class="sidebar-header" style="display: flex; justify-content: space-between; align-items: center; padding: 1.25rem 1.5rem;">
-          <div style="display: flex; align-items: center; gap: 0.75rem;">
-            <lucide-icon [name]="'settings'" class="text-primary-400" [size]="20"></lucide-icon>
-            <h2 class="text-xl font-semibold text-white">Settings</h2>
-          </div>
-          <button (click)="close.emit()" style="padding: 0.5rem; border-radius: 9999px; background: transparent; border: none; color: #475569; cursor: pointer; transition: color 0.2s;">
-            <lucide-icon [name]="'x'" [size]="20" class="hover:text-white"></lucide-icon>
-          </button>
+          <app-icon-title-base
+            [iconName]="'settings'"
+            [label]="'Settings'"
+            [iconColor]="'var(--primary-400)'"
+            size="large"
+          ></app-icon-title-base>
+          <app-close-icon-button (click)="close.emit()"></app-close-icon-button>
         </div>
 
         <!-- Declarative Tabs -->
-        <div style="flex: 1; min-height: 25rem;">
+        <div style="flex: 1; min-height: 0;">
           <app-tabs-base [(activeId)]="activeTab">
             <app-tab-base id="local" label="Local" icon="database">
                <div style="padding: 0 1.5rem 1.5rem;">
@@ -82,7 +86,8 @@ import { AdvancedSettingForm } from './advanced-setting-form.component';
       border-radius: 1.25rem;
       width: 100%;
       max-width: 32rem;
-      height: 40rem;
+      height: 46rem;
+      max-height: 90vh;
       display: flex;
       flex-direction: column;
       box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);

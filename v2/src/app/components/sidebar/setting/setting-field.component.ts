@@ -1,3 +1,16 @@
+/**
+ * Reusable Setting Field Layout Component
+ * Wraps an input/select with a label and optional hint.
+ * 
+ * Usage:
+ * <app-setting-field label="Temperature" hint="Controls randomness">
+ *   <app-slider ...></app-slider>
+ * </app-setting-field>
+ * 
+ * Inputs:
+ * - label (required): string - text label for the field
+ * - hint (optional): string - small help text shown below the content
+ */
 import { Component, input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
