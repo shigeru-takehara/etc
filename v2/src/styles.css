@@ -1,4 +1,5 @@
 @import "tailwindcss";
+
 /* PrismJS Theme for Syntax Highlighting */
 @import url('https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css');
 
@@ -221,6 +222,6 @@ body {
     h1,
     h2,
     .text-xl {
-        font-size: 1.125rem !important;
+        font-size: 1.5rem !important;
     }
 }

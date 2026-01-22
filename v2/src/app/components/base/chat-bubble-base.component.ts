@@ -61,7 +61,12 @@ import { AppMarkdownComponent } from './app-markdown.component';
     }
 
     .chat-bubble {
-      @apply flex gap-4 p-6 rounded-[1.25rem] mb-8 animate-[slideIn_0.3s_ease-out];
+      display: flex;
+      gap: 1rem;
+      padding: 1.5rem;
+      border-radius: 1.25rem;
+      margin-bottom: 2rem;
+      animation: slideIn 0.3s ease-out;
     }
 
     @keyframes slideIn {
@@ -76,24 +81,34 @@ import { AppMarkdownComponent } from './app-markdown.component';
     }
 
     .bubble-user {
-      @apply bg-slate-800/40;
+      background-color: rgba(30, 41, 59, 0.8); /* Slate 800/80 */
+      border: 1px solid rgba(51, 65, 85, 0.5); /* Slate 700/50 */
     }
 
     .bubble-assistant {
-      @apply bg-sky-500/5 border border-sky-500/10;
+      background-color: rgba(14, 165, 233, 0.05); /* Sky 500/5 */
+      border: 1px solid rgba(14, 165, 233, 0.1); /* Sky 500/10 */
     }
 
     .icon-box {
-      @apply w-10 h-10 rounded-xl flex items-center justify-center shadow-lg;
+      width: 2.5rem;
+      height: 2.5rem;
+      border-radius: 0.75rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
       flex-shrink: 0;
     }
 
     .icon-user {
-      @apply bg-slate-700 text-slate-300;
+      background-color: #334155; /* Slate 700 */
+      color: #cbd5e1; /* Slate 300 */
     }
 
     .icon-bot {
-      @apply bg-sky-500 text-white;
+      background-color: #0ea5e9; /* Sky 500 */
+      color: white;
     }
 
     @media (max-height: 850px) {
