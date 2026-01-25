@@ -1,8 +1,7 @@
-import { Component, input, output, inject } from '@angular/core';
+import { Component, input, output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { LabeledIconComponent } from '../../base/labeled-icon.component';
 import { DocumentItemComponent } from './document-item.component';
-import { RagService } from '../../../services/rag.service';
 
 @Component({
   selector: 'app-document-list',
