@@ -1,26 +1,27 @@
 import { Component, input, output, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { LucideAngularModule } from 'lucide-angular';
+import { ButtonBaseComponent } from '../../base/button-base.component';
 import { DocumentItemComponent } from './document-item.component';
 import { RagService } from '../../../services/rag.service';
 
 @Component({
   selector: 'app-document-list',
   standalone: true,
-  imports: [CommonModule, LucideAngularModule, DocumentItemComponent],
+  imports: [CommonModule, ButtonBaseComponent, DocumentItemComponent],
   template: `
     <div>
       <label class="text-xs font-semibold text-slate-500 uppercase tracking-wider px-2 mb-3 block" 
              style="display: block; margin-bottom: 0.75rem;">Documents</label>
-      <button 
-        (click)="fileInput.click()"
-        class="btn-primary"
-        style="width: 100%;"
-        title="Supported formats: PDF, DOCX, Markdown, Text"
-      >
-        <lucide-icon [name]="'plus'" [size]="18"></lucide-icon>
-        <span>Update Knowledge</span>
-      </button>
+      
+      <app-button-base
+        [iconName]="'plus'"
+        [label]="'Update Knowledge'"
+        [tooltip]="'Supported formats: PDF, DOCX, Markdown, Text'"
+        [variant]="'primary'"
+        [fullWidth]="true"
+        (btnClick)="fileInput.click()"
+      ></app-button-base>
+      
       <input #fileInput type="file" (change)="handleFileChange($event)" class="hidden" accept=".pdf,.docx,.md,.txt" style="display: none;" />
       
       <div style="margin-top: 1.5rem;">
@@ -39,10 +40,6 @@ import { RagService } from '../../../services/rag.service';
   `,
   styles: [`
     :host { display: block; }
-    .btn-primary {
-      @apply flex items-center justify-center gap-2 px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors font-medium text-sm;
-      background-color: var(--primary-600, #2563eb);
-    }
   `]
 })
 export class DocumentListComponent {
