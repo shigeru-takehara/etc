@@ -1,23 +1,23 @@
 import { Component, input, output, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { LucideAngularModule } from 'lucide-angular';
-import { IconTitleBaseComponent } from '../../base/icon-title-base.component';
+import { LabeledIconComponent } from '../../base/labeled-icon.component';
 
 @Component({
   selector: 'app-test-connection-button',
   standalone: true,
-  imports: [CommonModule, LucideAngularModule, IconTitleBaseComponent],
+  imports: [CommonModule, LucideAngularModule, LabeledIconComponent],
   template: `
     <button 
       (click)="test.emit()" 
       class="test-btn"
       [disabled]="testing()"
     >
-      <app-icon-title-base
+      <app-labeled-icon
         [iconName]="view().icon"
         [label]="view().label"
         [iconColor]="view().color"
-      ></app-icon-title-base>
+      ></app-labeled-icon>
     </button>
   `,
   styles: [`

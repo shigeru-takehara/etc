@@ -21,8 +21,8 @@ import { TestConnectionButtonComponent } from './test-connection-button.componen
   ],
   template: `
     <div class="space-y-4">
-      <div style="padding: 0.75rem; background: rgba(14, 165, 233, 0.1); border: 1px solid rgba(14, 165, 233, 0.2); border-radius: 0.5rem; margin-bottom: 1.5rem;">
-          <p style="font-size: 0.75rem; color: #7dd3fc; margin: 0; font-weight: 500;">
+      <div class="info-callout">
+          <p>
             Internal Knowledge Base: Active indexing and search.
           </p>
       </div>
@@ -52,7 +52,21 @@ import { TestConnectionButtonComponent } from './test-connection-button.componen
       ></app-test-connection-button>
     </div>
   `,
-  styles: []
+  styles: [`
+    .info-callout {
+      padding: 0.75rem;
+      background: rgba(14, 165, 233, 0.1);
+      border: 1px solid rgba(14, 165, 233, 0.2);
+      border-radius: 0.5rem;
+      margin-bottom: 1.5rem;
+    }
+    .info-callout p {
+      font-size: 0.75rem;
+      color: #7dd3fc;
+      margin: 0;
+      font-weight: 500;
+    }
+  `]
 })
 export class LocalSettingFormComponent {
   config = input.required<RagConfig>();

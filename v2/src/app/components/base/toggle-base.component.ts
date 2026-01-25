@@ -24,22 +24,21 @@ import { Component, input, output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { LucideAngularModule } from 'lucide-angular';
 import { AppToggleComponent } from './app-toggle.component';
-import { IconTitleBaseComponent } from './icon-title-base.component';
+import { LabeledIconComponent } from './labeled-icon.component';
 
 @Component({
   selector: 'app-toggle-base',
   standalone: true,
-  imports: [CommonModule, LucideAngularModule, AppToggleComponent, IconTitleBaseComponent],
+  imports: [CommonModule, LucideAngularModule, AppToggleComponent, LabeledIconComponent],
   template: `
     <div 
       class="toggle-row" 
       [title]="tooltip()"
     >
-      <app-icon-title-base
+      <app-labeled-icon
         [iconName]="iconName()"
         [label]="label()"
-        [iconColor]="iconColor()"
-      ></app-icon-title-base>
+      ></app-labeled-icon>
       <app-toggle
         [active]="isActive()"
         [activeBg]="activeBg()"

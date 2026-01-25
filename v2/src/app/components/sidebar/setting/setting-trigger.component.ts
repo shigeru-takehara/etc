@@ -1,20 +1,21 @@
 import { Component, output } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ButtonBaseComponent } from '../../base/button-base.component';
+import { LabeledIconComponent } from '../../base/labeled-icon.component';
 
 @Component({
   selector: 'app-setting-trigger',
   standalone: true,
-  imports: [CommonModule, ButtonBaseComponent],
+  imports: [CommonModule, LabeledIconComponent],
   template: `
-    <app-button-base
+    <app-labeled-icon
       [iconName]="'settings'"
       [label]="'Configure Provider'"
       [tooltip]="'Configure AI Provider and Models'"
       [variant]="'ghost'"
       [fullWidth]="true"
+      [clickable]="true"
       (btnClick)="clicked.emit()"
-    ></app-button-base>
+    ></app-labeled-icon>
   `,
   styles: [`
     :host { display: block; width: 100%; }
