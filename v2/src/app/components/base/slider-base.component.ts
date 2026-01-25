@@ -25,19 +25,19 @@ import { Component, input, output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { LucideAngularModule } from 'lucide-angular';
 import { AppSliderComponent } from './app-slider.component';
-import { IconTitleBaseComponent } from './icon-title-base.component';
+import { LabeledIconComponent } from './labeled-icon.component';
 
 @Component({
   selector: 'app-slider-base',
   standalone: true,
-  imports: [CommonModule, LucideAngularModule, AppSliderComponent, IconTitleBaseComponent],
+  imports: [CommonModule, LucideAngularModule, AppSliderComponent, LabeledIconComponent],
   template: `
     <div class="slider-row" [title]="tooltip()">
       <div class="slider-header">
-        <app-icon-title-base
+        <app-labeled-icon
           [iconName]="iconName()"
           [label]="label()"
-        ></app-icon-title-base>
+        ></app-labeled-icon>
         <span class="value-display">{{ displayValue() }}</span>
       </div>
       <app-slider

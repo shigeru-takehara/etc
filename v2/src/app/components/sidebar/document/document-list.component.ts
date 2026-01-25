@@ -1,26 +1,27 @@
 import { Component, input, output, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ButtonBaseComponent } from '../../base/button-base.component';
+import { LabeledIconComponent } from '../../base/labeled-icon.component';
 import { DocumentItemComponent } from './document-item.component';
 import { RagService } from '../../../services/rag.service';
 
 @Component({
   selector: 'app-document-list',
   standalone: true,
-  imports: [CommonModule, ButtonBaseComponent, DocumentItemComponent],
+  imports: [CommonModule, LabeledIconComponent, DocumentItemComponent],
   template: `
     <div>
       <label class="text-xs font-semibold text-slate-500 uppercase tracking-wider px-2 mb-3 block" 
              style="display: block; margin-bottom: 0.75rem;">Documents</label>
       
-      <app-button-base
+      <app-labeled-icon
         [iconName]="'plus'"
         [label]="'Update Knowledge'"
         [tooltip]="'Supported formats: PDF, DOCX, Markdown, Text'"
         [variant]="'primary'"
         [fullWidth]="true"
+        [clickable]="true"
         (btnClick)="fileInput.click()"
-      ></app-button-base>
+      ></app-labeled-icon>
       
       <input #fileInput type="file" (change)="handleFileChange($event)" class="hidden" accept=".pdf,.docx,.md,.txt" style="display: none;" />
       

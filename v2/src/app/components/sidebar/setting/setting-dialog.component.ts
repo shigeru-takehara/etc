@@ -8,7 +8,7 @@ import { LocalSettingFormComponent } from './local-setting-form.component';
 import { CloudSettingFormComponent } from './cloud-setting-form.component';
 import { AdvancedSettingForm } from './advanced-setting-form.component';
 import { CloseIconButtonComponent } from './close-icon-button.component';
-import { IconTitleBaseComponent } from '../../base/icon-title-base.component';
+import { LabeledIconComponent } from '../../base/labeled-icon.component';
 
 @Component({
   selector: 'app-setting-dialog',
@@ -22,19 +22,19 @@ import { IconTitleBaseComponent } from '../../base/icon-title-base.component';
     CloudSettingFormComponent,
     AdvancedSettingForm,
     CloseIconButtonComponent,
-    IconTitleBaseComponent
+    LabeledIconComponent
   ],
   template: `
     <div *ngIf="isOpen()" class="modal-overlay">
       <div class="modal-content animate-in fade-in zoom-in duration-200">
         <!-- Header -->
         <div class="sidebar-header" style="display: flex; justify-content: space-between; align-items: center; padding: 1.25rem 1.5rem;">
-          <app-icon-title-base
+          <app-labeled-icon
             [iconName]="'settings'"
             [label]="'Settings'"
             [iconColor]="'var(--primary-400)'"
             size="large"
-          ></app-icon-title-base>
+          ></app-labeled-icon>
           <app-close-icon-button (click)="close.emit()"></app-close-icon-button>
         </div>
 
